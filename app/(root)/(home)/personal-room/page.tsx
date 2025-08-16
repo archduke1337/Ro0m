@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useStreamVideoClient } from "@stream-io/video-react-sdk";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { useGetCallById } from "@/hooks/useGetCallById";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,22 @@ const PersonalRoom = () => {
   const { user } = useUser();
   const client = useStreamVideoClient();
   const { toast } = useToast();
+  
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Success",
+        description: "Meeting link copied to clipboard!",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to copy meeting link",
+        variant: "destructive",
+      });
+    }
+  };
 
   const meetingId = user?.id;
 
@@ -68,14 +85,19 @@ const PersonalRoom = () => {
           Start Meeting
         </Button>
         <Button
-          className="bg-dark-3"
+          className="bg-dark-3 flex items-center gap-2"
           onClick={() => {
-            navigator.clipboard.writeText(meetingLink);
-            toast({
-              title: "Link Copied",
-            });
+            const inviteText = `Join my meeting room!\n\nTopic: ${user?.username}'s Meeting Room\nMeeting ID: ${meetingId}\nJoin Link: ${meetingLink}`;
+            copyToClipboard(inviteText);
           }}
         >
+          <Image
+            src="/icons/copy.svg"
+            alt="copy"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
           Copy Invitation
         </Button>
       </div>
