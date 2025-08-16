@@ -1,12 +1,14 @@
 'use client';
 
 import { Call, CallRecording } from '@stream-io/video-react-sdk';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Loader from './Loader';
 import { useGetCalls } from '@/hooks/useGetCalls';
 import MeetingCard from './MeetingCard';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { getMeetingLink } from '@/lib/meeting-utils';
+import { useToast } from './ui/use-toast';
 
 const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
   const router = useRouter();
@@ -40,23 +42,45 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
     }
   };
 
+  const { toast } = useToast();
+
   useEffect(() => {
     const fetchRecordings = async () => {
-      const callData = await Promise.all(
-        callRecordings?.map((meeting) => meeting.queryRecordings()) ?? [],
-      );
+      if (!callRecordings?.length) {
+        setRecordings([]);
+        return;
+      }
 
-      const recordings = callData
-        .filter((call) => call.recordings.length > 0)
-        .flatMap((call) => call.recordings);
+      try {
+        const callData = await Promise.all(
+          callRecordings.map((meeting) => 
+            meeting.queryRecordings().catch(error => {
+              console.error('Error fetching recording:', error);
+              return { recordings: [] };
+            })
+          )
+        );
 
-      setRecordings(recordings);
+        const newRecordings = callData
+          .filter((call) => call.recordings?.length > 0)
+          .flatMap((call) => call.recordings);
+
+        setRecordings(newRecordings);
+      } catch (error) {
+        console.error('Error fetching recordings:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch recordings. Please try again.',
+          variant: 'destructive',
+        });
+        setRecordings([]);
+      }
     };
 
     if (type === 'recordings') {
       fetchRecordings();
     }
-  }, [type, callRecordings]);
+  }, [type, callRecordings, toast]);
 
   if (isLoading) return <Loader />;
 
@@ -66,9 +90,18 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       {calls && calls.length > 0 ? (
-        calls.map((meeting: Call | CallRecording) => (
+        calls.map((meeting: Call | CallRecording) => {
+          const isRecording = type === 'recordings';
+          const title = isRecording
+            ? (meeting as CallRecording).filename?.substring(0, 20) || 'No Description'
+            : (meeting as Call).state?.custom?.description || 'No Description';
+          const date = isRecording
+            ? (meeting as CallRecording).start_time?.toLocaleString() || 'No date'
+            : (meeting as Call).state?.startsAt?.toLocaleString() || 'No date';
+          
+          return (
           <MeetingCard
-            key={(meeting as Call).id}
+            key={isRecording ? (meeting as CallRecording).url : (meeting as Call).id}
             icon={
               type === 'ended'
                 ? '/icons/previous.svg'
@@ -76,28 +109,35 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
                   ? '/icons/upcoming.svg'
                   : '/icons/recordings.svg'
             }
-            title={
-              (meeting as Call).state?.custom?.description ||
-              (meeting as CallRecording).filename?.substring(0, 20) ||
-              'No Description'
-            }
-            date={
-              (meeting as Call).state?.startsAt?.toLocaleString() ||
-              (meeting as CallRecording).start_time?.toLocaleString()
-            }
+            title={title}
+            date={date}
             isPreviousMeeting={type === 'ended'}
-            link={
-              type === 'recordings'
-                ? (meeting as CallRecording).url
-                : (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes('localhost'))
-                  ? `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${(meeting as Call).id}`
-                  : `${window?.location?.origin || ''}/meeting/${(meeting as Call).id}`
-            }
-            buttonIcon1={type === 'recordings' ? '/icons/play.svg' : undefined}
-            buttonText={type === 'recordings' ? 'Play' : 'Start'}
+            link={isRecording ? (meeting as CallRecording).url : getMeetingLink((meeting as Call).id)}
+            buttonIcon1={isRecording ? '/icons/play.svg' : undefined}
+            buttonText={isRecording ? 'Play' : 'Start'}
             handleClick={
-              type === 'recordings'
-                ? () => router.push(`${(meeting as CallRecording).url}`)
+              isRecording 
+                ? () => {
+                    const url = (meeting as CallRecording).url;
+                    if (url) {
+                      router.push(url);
+                    } else {
+                      toast({
+                        title: 'Error',
+                        description: 'Recording URL not found',
+                        variant: 'destructive'
+                      });
+                    }
+                  }
+                : undefined
+            }
+          />
+        ))}
+      ) : (
+        <p className="col-span-full text-center text-white">{noCallsMessage}</p>
+      )}
+    </div>
+  );
                 : () => router.push(`/meeting/${(meeting as Call).id}`)
             }
           />
