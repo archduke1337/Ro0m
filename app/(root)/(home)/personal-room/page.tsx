@@ -103,8 +103,19 @@ const PersonalRoom = () => {
     router.push(`/meeting/${meetingId}?personal=true`);
   };
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-  const meetingLink = `${baseUrl}/meeting/${meetingId}?personal=true`;
+  const getMeetingLink = () => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    // In production, use the configured URL
+    if (baseUrl && !baseUrl.includes('localhost')) {
+      return `${baseUrl}/meeting/${meetingId}?personal=true`;
+    }
+    // In development or if BASE_URL is not set, use the current origin
+    return typeof window !== 'undefined' 
+      ? `${window.location.origin}/meeting/${meetingId}?personal=true`
+      : `/meeting/${meetingId}?personal=true`;
+  };
+  
+  const meetingLink = getMeetingLink();
 
   return (
     <section className="flex size-full flex-col gap-10 text-white">
