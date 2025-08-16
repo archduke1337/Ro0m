@@ -35,16 +35,49 @@ const PersonalRoom = () => {
   const { toast } = useToast();
   
   const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "Success",
-        description: "Meeting link copied to clipboard!",
-      });
-    } catch (err) {
+    if (!text) {
       toast({
         title: "Error",
-        description: "Failed to copy meeting link",
+        description: "No content to copy",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        // For HTTPS or localhost
+        await navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for HTTP
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand("copy");
+          textArea.remove();
+        } catch (error) {
+          console.error("Fallback copy failed:", error);
+          textArea.remove();
+          throw error;
+        }
+      }
+      
+      toast({
+        title: "Success",
+        description: "Meeting invitation copied to clipboard!",
+      });
+    } catch (err) {
+      console.error("Copy failed:", err);
+      toast({
+        title: "Error",
+        description: "Failed to copy invitation. Please try again.",
         variant: "destructive",
       });
     }
@@ -70,7 +103,8 @@ const PersonalRoom = () => {
     router.push(`/meeting/${meetingId}?personal=true`);
   };
 
-  const meetingLink = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${meetingId}?personal=true`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+  const meetingLink = `${baseUrl}/meeting/${meetingId}?personal=true`;
 
   return (
     <section className="flex size-full flex-col gap-10 text-white">
@@ -85,7 +119,7 @@ const PersonalRoom = () => {
           Start Meeting
         </Button>
         <Button
-          className="bg-dark-3 flex items-center gap-2"
+          className="flex items-center gap-2 bg-dark-3"
           onClick={() => {
             const inviteText = `Join my meeting room!\n\nTopic: ${user?.username}'s Meeting Room\nMeeting ID: ${meetingId}\nJoin Link: ${meetingLink}`;
             copyToClipboard(inviteText);
