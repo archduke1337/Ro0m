@@ -34,53 +34,21 @@ const PersonalRoom = () => {
   const client = useStreamVideoClient();
   const { toast } = useToast();
   
-  const copyToClipboard = async (text: string) => {
-    if (!text) {
-      toast({
-        title: "Error",
-        description: "No content to copy",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        // For HTTPS or localhost
-        await navigator.clipboard.writeText(text);
-      } else {
-        // Fallback for HTTP
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        textArea.style.left = "-999999px";
-        textArea.style.top = "-999999px";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
-        try {
-          document.execCommand("copy");
-          textArea.remove();
-        } catch (error) {
-          console.error("Fallback copy failed:", error);
-          textArea.remove();
-          throw error;
-        }
-      }
-      
+  const copyToClipboard = (text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
       toast({
         title: "Success",
         description: "Meeting invitation copied to clipboard!",
       });
-    } catch (err) {
+    }).catch((err) => {
       console.error("Copy failed:", err);
       toast({
         title: "Error",
         description: "Failed to copy invitation. Please try again.",
         variant: "destructive",
       });
-    }
+    });
   };
 
   const meetingId = user?.id;
