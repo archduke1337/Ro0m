@@ -8,7 +8,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Ro0m",
@@ -22,7 +25,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <ClerkProvider
         appearance={{
           layout: {
@@ -30,15 +33,24 @@ export default function RootLayout({
             logoImageUrl: "/icons/logo.svg",
           },
           variables: {
-            colorText: "#fff",
-            colorPrimary: "#0E78F9",
-            colorBackground: "#1C1F2E",
-            colorInputBackground: "#252A41",
-            colorInputText: "#fff",
+            colorText: "#FFFFFF",
+            colorPrimary: "#FFFFFF",
+            colorBackground: "#0A0A0A",
+            colorInputBackground: "#1C1C1E",
+            colorInputText: "#FFFFFF",
+            borderRadius: "12px",
+          },
+          elements: {
+            card: "bg-bg-secondary border border-border-subtle",
+            headerTitle: "text-fg-primary",
+            headerSubtitle: "text-fg-secondary",
+            socialButtonsIconButton: "border-border hover:bg-accent-muted",
+            formButtonPrimary: "bg-fg-primary text-bg-primary hover:opacity-90",
+            footerActionLink: "text-fg-secondary hover:text-fg-primary",
           },
         }}
       >
-        <body className={`${inter.className} bg-dark-2`}>
+        <body className={`${inter.className} bg-bg-primary text-fg-primary antialiased`}>
           <Toaster />
           {children}
         </body>
@@ -46,3 +58,4 @@ export default function RootLayout({
     </html>
   );
 }
+

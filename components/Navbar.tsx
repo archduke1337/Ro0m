@@ -6,22 +6,29 @@ import MobileNav from './MobileNav';
 
 const Navbar = () => {
   return (
-    <nav className="flex-between fixed z-50 w-full bg-dark-1 px-6 py-4 lg:px-10">
-      <Link href="/" className="flex items-center gap-1">
+    <nav className="flex-between fixed z-50 w-full border-b border-border-subtle bg-bg-primary/80 backdrop-blur-xl px-6 py-4 lg:px-10">
+      <Link href="/" className="flex items-center gap-2 group">
         <Image
           src="/icons/logo.svg"
-          width={32}
-          height={32}
-          alt="ro0m logo"
-          className="max-sm:size-10"
+          width={28}
+          height={28}
+          alt="Ro0m logo"
+          className="max-sm:size-8 transition-transform group-hover:scale-105"
         />
-        <p className="text-[26px] font-extrabold text-white max-sm:hidden">
+        <p className="text-xl font-semibold tracking-tight text-fg-primary max-sm:hidden">
           Ro0m
         </p>
       </Link>
       <div className="flex-between gap-5">
         <SignedIn>
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton 
+            afterSignOutUrl="/sign-in"
+            appearance={{
+              elements: {
+                avatarBox: "size-9 ring-2 ring-border-subtle hover:ring-border transition-all",
+              }
+            }}
+          />
         </SignedIn>
 
         <MobileNav />

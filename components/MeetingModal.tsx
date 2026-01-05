@@ -30,33 +30,34 @@ const MeetingModal = ({
 }: MeetingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="flex w-full max-w-[520px] flex-col gap-6 border-none bg-dark-1 px-6 py-9 text-white">
+      <DialogContent className="flex w-full max-w-[480px] flex-col gap-6 border border-border-subtle bg-bg-elevated px-8 py-10 text-fg-primary rounded-swift-xl">
         <div className="flex flex-col gap-6">
           {image && (
             <div className="flex justify-center">
-              <Image src={image} alt="checked" width={72} height={72} />
+              <div className="flex-center size-16 rounded-swift-lg bg-accent-muted border border-border-subtle">
+                <Image src={image} alt="" width={32} height={32} className="opacity-80" />
+              </div>
             </div>
           )}
-          <h1 className={cn("text-3xl font-bold leading-[42px]", className)}>
+          <h1 className={cn("text-xl font-semibold tracking-tight text-center", className)}>
             {title}
           </h1>
           {children}
           <Button
-            className={
-              "bg-blue-1 focus-visible:ring-0 focus-visible:ring-offset-0"
-            }
+            className="w-full rounded-swift bg-fg-primary py-3 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity"
             onClick={handleClick}
           >
             {buttonIcon && (
               <Image
                 src={buttonIcon}
-                alt="button icon"
-                width={13}
-                height={13}
+                alt=""
+                width={16}
+                height={16}
+                className="brightness-0"
               />
-            )}{" "}
-            &nbsp;
-            {buttonText || "Schedule Meeting"}
+            )}
+            {buttonIcon && <span className="ml-2">{buttonText || "Schedule Meeting"}</span>}
+            {!buttonIcon && (buttonText || "Schedule Meeting")}
           </Button>
         </div>
       </DialogContent>

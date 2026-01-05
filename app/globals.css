@@ -2,16 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   SwiftUI-Inspired Minimalist Theme
+   ======================================== */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ======== stream css overrides ======== */
+/* Custom scrollbar - minimal */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* ======== Stream SDK Overrides - Minimal Theme ======== */
 .str-video__call-stats {
   max-width: 500px;
   position: relative;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
 }
 
 .str-video__speaker-layout__wrapper {
@@ -24,37 +56,41 @@
 
 .str-video__menu-container {
   color: white;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
 }
 
 .str-video__notification {
   color: white;
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
 }
 
 .str-video__participant-list {
-  background-color: #1c1f2e;
-  padding: 10px;
-  border-radius: 10px;
+  background-color: #1c1c1e;
+  padding: 16px;
+  border-radius: 12px;
   color: white;
   height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .str-video__call-controls__button {
-  height: 40px;
+  height: 44px;
+  width: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-}
-.glassmorphism2 {
-  background: rgba(18, 17, 17, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+.str-video__call-controls__button:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
-/* ==== clerk class override ===== */
-
+/* ======== Clerk Overrides - Minimal Theme ======== */
 .cl-userButtonPopoverActionButtonIcon {
   color: white;
 }
@@ -62,51 +98,131 @@
 .cl-logoBox {
   height: 40px;
 }
+
 .cl-dividerLine {
-  background: #252a41;
-  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  height: 1px;
 }
 
 .cl-socialButtonsIconButton {
-  border: 3px solid #565761;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.cl-socialButtonsIconButton:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .cl-internal-wkkub3 {
   color: white;
 }
+
 .cl-userButtonPopoverActionButton {
   color: white;
 }
 
-/* =============================== */
-
+/* ======== Utility Classes ======== */
 @layer utilities {
   .flex-center {
-    @apply flex justify-center items-center;
+    @apply flex items-center justify-center;
   }
 
   .flex-between {
-    @apply flex justify-between items-center;
+    @apply flex items-center justify-between;
+  }
+
+  /* Glass morphism - SwiftUI vibrancy effect */
+  .glass {
+    background: rgba(28, 28, 30, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .glass-subtle {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Swift-style card */
+  .swift-card {
+    @apply rounded-swift-lg bg-bg-elevated border border-border-subtle;
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .swift-card:hover {
+    @apply border-border bg-bg-tertiary;
+  }
+
+  /* Swift-style button */
+  .swift-button {
+    @apply rounded-swift px-4 py-2.5 font-medium text-sm;
+    @apply bg-fg-primary text-bg-primary;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:opacity-90 active:scale-[0.98];
+  }
+
+  .swift-button-secondary {
+    @apply rounded-swift px-4 py-2.5 font-medium text-sm;
+    @apply bg-accent-muted text-fg-primary border border-border-subtle;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-accent-hover hover:border-border;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-fg-primary to-fg-secondary bg-clip-text text-transparent;
   }
 }
 
-/* animation */
-
+/* ======== Animation Classes ======== */
 .show-block {
   width: 100%;
   max-width: 350px;
   display: block;
-  animation: show 0.7s forwards linear;
+  animation: show 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes show {
   0% {
-    animation-timing-function: ease-in;
-    width: 0%;
+    opacity: 0;
+    width: 0;
+    transform: translateX(-10px);
   }
-
   100% {
-    animation-timing-function: ease-in;
+    opacity: 1;
     width: 100%;
+    transform: translateX(0);
   }
+}
+
+/* Subtle hover animation for interactive elements */
+.hover-lift {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Legacy glassmorphism classes (for compatibility) */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glassmorphism2 {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

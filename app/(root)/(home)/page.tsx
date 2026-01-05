@@ -28,17 +28,37 @@ const Home = () => {
     : null;
 
   return (
-    <section className="flex size-full flex-col gap-5 text-white">
-      <div className="h-[303px] w-full rounded-[20px] bg-hero bg-cover">
-        <div className="flex h-full flex-col justify-between max-md:px-5 max-md:py-8 lg:p-11">
-          <h2 className="glassmorphism max-w-[273px] rounded py-2 text-center text-base font-normal">
-            {upcomingMeetingTime 
-              ? `Upcoming Meeting at: ${upcomingMeetingTime}`
-              : 'No Upcoming Meetings'}
-          </h2>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-4xl font-extrabold lg:text-7xl">{time}</h1>
-            <p className="text-lg font-medium text-sky-1 lg:text-2xl">{date}</p>
+    <section className="flex size-full flex-col gap-8 text-fg-primary">
+      {/* Hero Section - SwiftUI inspired */}
+      <div className="relative overflow-hidden rounded-swift-xl border border-border-subtle bg-bg-elevated">
+        {/* Subtle gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-white/[0.01]" />
+        
+        <div className="relative flex h-[280px] flex-col justify-between p-8 lg:p-10">
+          {/* Upcoming meeting badge */}
+          {upcomingMeetingTime && (
+            <div className="glass-subtle w-fit rounded-swift px-4 py-2">
+              <span className="text-sm font-medium text-fg-secondary">
+                Next meeting at <span className="text-fg-primary">{upcomingMeetingTime}</span>
+              </span>
+            </div>
+          )}
+          {!upcomingMeetingTime && (
+            <div className="glass-subtle w-fit rounded-swift px-4 py-2">
+              <span className="text-sm font-medium text-fg-tertiary">
+                No upcoming meetings
+              </span>
+            </div>
+          )}
+          
+          {/* Time display */}
+          <div className="flex flex-col gap-1">
+            <h1 className="text-display text-fg-primary tracking-tighter lg:text-[5rem]">
+              {time}
+            </h1>
+            <p className="text-lg font-medium text-fg-secondary lg:text-xl">
+              {date}
+            </p>
           </div>
         </div>
       </div>

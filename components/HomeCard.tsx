@@ -25,20 +25,29 @@ const HomeCard = ({ className, img, title, description, handleClick }: HomeCardP
       role="button"
       tabIndex={0}
       className={cn(
-        'bg-orange-1 px-4 py-6 flex flex-col justify-between w-full xl:max-w-[270px] min-h-[260px] rounded-[14px] cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-1 focus:ring-offset-2 focus:ring-offset-dark-2',
+        'group relative overflow-hidden',
+        'px-6 py-8 flex flex-col justify-between w-full xl:max-w-[270px] min-h-[240px]',
+        'rounded-swift-lg border border-border-subtle bg-bg-elevated',
+        'cursor-pointer transition-all duration-300 ease-out',
+        'hover:border-border hover:bg-bg-tertiary hover:shadow-swift',
+        'focus:outline-none focus:ring-2 focus:ring-fg-primary/20 focus:ring-offset-2 focus:ring-offset-bg-primary',
+        'active:scale-[0.98]',
         className
       )}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       aria-label={`${title}: ${description}`}
     >
-      <div className="flex-center glassmorphism size-12 rounded-[10px]">
-        <Image src={img} alt="" width={27} height={27} aria-hidden="true" />
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      <div className="relative flex-center size-12 rounded-swift bg-accent-muted border border-border-subtle group-hover:border-border transition-colors">
+        <Image src={img} alt="" width={24} height={24} aria-hidden="true" className="opacity-80" />
       </div>
       
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold">{title}</h2>
-        <p className="text-lg font-normal">{description}</p>
+      <div className="relative flex flex-col gap-1.5">
+        <h2 className="text-lg font-semibold text-fg-primary tracking-tight">{title}</h2>
+        <p className="text-sm text-fg-secondary">{description}</p>
       </div>
     </div>
   );
