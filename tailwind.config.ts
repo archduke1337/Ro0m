@@ -8,6 +8,8 @@ const config = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  // Safelist classes used dynamically (e.g., group-[.destructive] selectors)
+  safelist: ['destructive'],
   prefix: '',
   theme: {
     container: {
