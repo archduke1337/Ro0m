@@ -32,6 +32,15 @@ const shortcutGroups: ShortcutGroup[] = [
     ],
   },
   {
+    title: 'Meeting Room',
+    shortcuts: [
+      { keys: ['M'], description: 'Toggle Microphone' },
+      { keys: ['V'], description: 'Toggle Video' },
+      { keys: ['H'], description: 'Raise/Lower Hand' },
+      { keys: ['I'], description: 'Toggle Info Stats' },
+    ],
+  },
+  {
     title: 'General',
     shortcuts: [
       { keys: ['⌘', 'K'], description: 'Open command palette' },

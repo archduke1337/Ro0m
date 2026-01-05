@@ -11,7 +11,7 @@ import {
   useCallStateHooks,
 } from '@stream-io/video-react-sdk';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Users, LayoutList, Hand } from 'lucide-react';
+import { Users, LayoutList, Hand, Mic, MicOff, Video, VideoOff, Activity } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -23,6 +23,8 @@ import {
 import Loader from './Loader';
 import EndCallButton from './EndCallButton';
 import MeetingReactions from './MeetingReactions';
+import KeyboardHUD from './KeyboardHUD';
+import MeetingStatsHUD from './MeetingStatsHUD';
 import { cn } from '@/lib/utils';
 import { useSounds } from '@/hooks/useSounds';
 import { useEffect } from 'react';
@@ -36,11 +38,19 @@ const MeetingRoom = () => {
   const call = useCall();
   const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
   const [showParticipants, setShowParticipants] = useState(false);
-  const { useCallCallingState, useLocalParticipant } = useCallStateHooks();
+  const [showStats, setShowStats] = useState(false);
+  const { 
+    useCallCallingState, 
+    useLocalParticipant,
+    useMicrophoneState,
+    useCameraState 
+  } = useCallStateHooks();
   const { playSound } = useSounds();
 
   const localParticipant = useLocalParticipant();
   const isHandRaised = (localParticipant as any)?.isHandRaised;
+  const { microphone, isMute } = useMicrophoneState();
+  const { camera, isMute: isCameraMute } = useCameraState();
 
   const callingState = useCallCallingState();
 
@@ -71,14 +81,70 @@ const MeetingRoom = () => {
       if (isHandRaised) {
         await (call as any).lowerHand();
         playSound('click');
+        window.dispatchEvent(new CustomEvent('show-hud', { 
+          detail: { label: 'Hand Lowered', icon: Hand, active: false } 
+        }));
       } else {
         await (call as any).raiseHand();
         playSound('hand');
+        window.dispatchEvent(new CustomEvent('show-hud', { 
+          detail: { label: 'Hand Raised', icon: Hand, active: true } 
+        }));
       }
     } catch (error) {
       console.error('Failed to toggle hand:', error);
     }
   }, [call, isHandRaised, playSound]);
+
+  // Keyboard shortcuts for the meeting room
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if typing in an input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      switch (e.key.toLowerCase()) {
+        case 'm':
+          e.preventDefault();
+          microphone.toggle().then(() => {
+            playSound(isMute ? 'click' : 'pop');
+            window.dispatchEvent(new CustomEvent('show-hud', { 
+              detail: { 
+                label: isMute ? 'Microphone On' : 'Microphone Off', 
+                icon: isMute ? Mic : MicOff,
+                active: isMute
+              } 
+            }));
+          });
+          break;
+        case 'v':
+          e.preventDefault();
+          camera.toggle().then(() => {
+            playSound(isCameraMute ? 'click' : 'pop');
+            window.dispatchEvent(new CustomEvent('show-hud', { 
+              detail: { 
+                label: isCameraMute ? 'Camera On' : 'Camera Off', 
+                icon: isCameraMute ? Video : VideoOff,
+                active: isCameraMute
+              } 
+            }));
+          });
+          break;
+        case 'h':
+          e.preventDefault();
+          toggleHand();
+          break;
+        case 'i':
+          e.preventDefault();
+          setShowStats(prev => !prev);
+          playSound('ping');
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [microphone, camera, isMute, isCameraMute, toggleHand, playSound]);
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -95,6 +161,12 @@ const MeetingRoom = () => {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-bg-primary pt-4 text-fg-primary">
+      {/* Keyboard HUD Confirmation */}
+      <KeyboardHUD />
+
+      {/* Connection Stats HUD */}
+      <MeetingStatsHUD isOpen={showStats} onClose={() => setShowStats(false)} />
+
       <div className="relative flex size-full items-center justify-center">
         <div className="flex size-full max-w-[1000px] items-center">
           <CallLayout />
@@ -155,7 +227,22 @@ const MeetingRoom = () => {
           </DropdownMenuContent>
         </DropdownMenu>
         
-        <CallStatsButton />
+        {/* Toggle Stats Sidebar */}
+        <button 
+          onClick={() => {
+            setShowStats(!showStats);
+            playSound('ping');
+          }}
+          className={cn(
+            'cursor-pointer rounded-swift border p-3 transition-colors',
+            showStats 
+              ? 'bg-fg-primary text-bg-primary border-fg-primary' 
+              : 'bg-accent-muted border-border-subtle hover:bg-accent-hover text-fg-primary'
+          )}
+          title="System Stats (I)"
+        >
+          <Activity size={18} />
+        </button>
         
         <button 
           onClick={() => setShowParticipants((prev) => !prev)}
