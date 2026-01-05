@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { Dialog, DialogContent } from './ui/dialog';
 import { 
   Video, 
@@ -11,7 +12,9 @@ import {
   Home, 
   Plus,
   Link as LinkIcon,
-  Settings,
+  Sun,
+  Moon,
+  Monitor,
   LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,7 +26,7 @@ interface CommandItem {
   icon: React.ReactNode;
   shortcut?: string;
   action: () => void;
-  category: 'navigation' | 'actions' | 'account';
+  category: 'navigation' | 'actions' | 'theme' | 'account';
 }
 
 const CommandPalette = () => {
@@ -32,6 +35,7 @@ const CommandPalette = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const router = useRouter();
   const { signOut } = useClerk();
+  const { setTheme } = useTheme();
 
   const navigate = useCallback((path: string) => {
     router.push(path);
@@ -116,6 +120,37 @@ const CommandPalette = () => {
       },
       category: 'actions',
     },
+    // Theme
+    {
+      id: 'theme-light',
+      label: 'Switch to Light Mode',
+      icon: <Sun size={18} />,
+      action: () => {
+        setTheme('light');
+        setOpen(false);
+      },
+      category: 'theme',
+    },
+    {
+      id: 'theme-dark',
+      label: 'Switch to Dark Mode',
+      icon: <Moon size={18} />,
+      action: () => {
+        setTheme('dark');
+        setOpen(false);
+      },
+      category: 'theme',
+    },
+    {
+      id: 'theme-system',
+      label: 'Use System Theme',
+      icon: <Monitor size={18} />,
+      action: () => {
+        setTheme('system');
+        setOpen(false);
+      },
+      category: 'theme',
+    },
     // Account
     {
       id: 'sign-out',
@@ -135,6 +170,7 @@ const CommandPalette = () => {
   const groupedCommands = {
     navigation: filteredCommands.filter((c) => c.category === 'navigation'),
     actions: filteredCommands.filter((c) => c.category === 'actions'),
+    theme: filteredCommands.filter((c) => c.category === 'theme'),
     account: filteredCommands.filter((c) => c.category === 'account'),
   };
 
@@ -254,7 +290,8 @@ const CommandPalette = () => {
   // Calculate start indices for each category
   let navigationStart = 0;
   let actionsStart = groupedCommands.navigation.length;
-  let accountStart = actionsStart + groupedCommands.actions.length;
+  let themeStart = actionsStart + groupedCommands.actions.length;
+  let accountStart = themeStart + groupedCommands.theme.length;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -301,6 +338,7 @@ const CommandPalette = () => {
             <>
               {renderCategory('Navigation', groupedCommands.navigation, navigationStart)}
               {renderCategory('Actions', groupedCommands.actions, actionsStart)}
+              {renderCategory('Theme', groupedCommands.theme, themeStart)}
               {renderCategory('Account', groupedCommands.account, accountStart)}
             </>
           )}
