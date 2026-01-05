@@ -19,43 +19,43 @@ const config = {
       },
     },
     extend: {
-      // SwiftUI-inspired monochromatic palette
+      // SwiftUI-inspired palette using CSS variables for theme support
       colors: {
         // Primary backgrounds
         bg: {
-          primary: '#000000',
-          secondary: '#0A0A0A',
-          tertiary: '#141414',
-          elevated: '#1C1C1E',
-          card: '#1C1C1E',
+          primary: 'rgb(var(--bg-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--bg-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--bg-tertiary) / <alpha-value>)',
+          elevated: 'rgb(var(--bg-elevated) / <alpha-value>)',
+          card: 'rgb(var(--bg-elevated) / <alpha-value>)',
         },
         // Foreground/text colors
         fg: {
-          primary: '#FFFFFF',
-          secondary: '#A1A1A6',
-          tertiary: '#636366',
-          muted: '#48484A',
+          primary: 'rgb(var(--fg-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--fg-secondary) / <alpha-value>)',
+          tertiary: 'rgb(var(--fg-tertiary) / <alpha-value>)',
+          muted: 'rgb(var(--fg-muted) / <alpha-value>)',
         },
         // Accent colors (minimal use)
         accent: {
-          DEFAULT: '#FFFFFF',
-          muted: 'rgba(255, 255, 255, 0.1)',
-          hover: 'rgba(255, 255, 255, 0.05)',
+          DEFAULT: 'rgb(var(--fg-primary) / <alpha-value>)',
+          muted: 'rgb(var(--accent-muted))',
+          hover: 'rgb(var(--accent-hover))',
         },
         // Borders and separators
         border: {
-          DEFAULT: 'rgba(255, 255, 255, 0.1)',
-          subtle: 'rgba(255, 255, 255, 0.05)',
-          strong: 'rgba(255, 255, 255, 0.2)',
+          DEFAULT: 'rgb(var(--border-default))',
+          subtle: 'rgb(var(--border-subtle))',
+          strong: 'rgb(var(--border-strong))',
         },
-        // System colors for status
+        // System colors for status (these stay constant)
         system: {
           success: '#30D158',
           warning: '#FFD60A',
           error: '#FF453A',
           info: '#64D2FF',
         },
-        // Legacy colors (kept for compatibility, can remove later)
+        // Legacy colors (kept for compatibility)
         dark: {
           1: '#1C1C1E',
           2: '#0A0A0A',
@@ -63,10 +63,10 @@ const config = {
           4: '#3A3A3C',
         },
         blue: {
-          1: '#FFFFFF',
+          1: 'rgb(var(--fg-primary) / <alpha-value>)',
         },
         sky: {
-          1: '#A1A1A6',
+          1: 'rgb(var(--fg-secondary) / <alpha-value>)',
           2: '#E5E5EA',
           3: '#F2F2F7',
         },

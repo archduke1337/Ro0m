@@ -4,7 +4,50 @@
 
 /* ========================================
    SwiftUI-Inspired Minimalist Theme
+   CSS Variables for Light/Dark Mode
    ======================================== */
+
+@layer base {
+  :root {
+    /* Light mode colors */
+    --bg-primary: 255 255 255;
+    --bg-secondary: 249 249 249;
+    --bg-tertiary: 242 242 247;
+    --bg-elevated: 255 255 255;
+
+    --fg-primary: 0 0 0;
+    --fg-secondary: 99 99 102;
+    --fg-tertiary: 142 142 147;
+    --fg-muted: 174 174 178;
+
+    --accent-muted: 0 0 0 / 0.05;
+    --accent-hover: 0 0 0 / 0.03;
+
+    --border-default: 0 0 0 / 0.1;
+    --border-subtle: 0 0 0 / 0.05;
+    --border-strong: 0 0 0 / 0.15;
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --bg-primary: 0 0 0;
+    --bg-secondary: 10 10 10;
+    --bg-tertiary: 20 20 20;
+    --bg-elevated: 28 28 30;
+
+    --fg-primary: 255 255 255;
+    --fg-secondary: 161 161 166;
+    --fg-tertiary: 99 99 102;
+    --fg-muted: 72 72 74;
+
+    --accent-muted: 255 255 255 / 0.1;
+    --accent-hover: 255 255 255 / 0.05;
+
+    --border-default: 255 255 255 / 0.1;
+    --border-subtle: 255 255 255 / 0.05;
+    --border-strong: 255 255 255 / 0.2;
+  }
+}
 
 * {
   margin: 0;
