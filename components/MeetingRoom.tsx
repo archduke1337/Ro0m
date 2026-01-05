@@ -25,6 +25,8 @@ import EndCallButton from './EndCallButton';
 import MeetingReactions from './MeetingReactions';
 import KeyboardHUD from './KeyboardHUD';
 import MeetingStatsHUD from './MeetingStatsHUD';
+import AudioVisualizer from './AudioVisualizer';
+import DynamicIsland from './DynamicIsland';
 import { cn } from '@/lib/utils';
 import { useSounds } from '@/hooks/useSounds';
 import { useEffect } from 'react';
@@ -54,7 +56,7 @@ const MeetingRoom = () => {
 
   const callingState = useCallCallingState();
 
-  // Handle participant join/leave sounds
+  // Handle participant join/leave sounds & Dynamic Island
   useEffect(() => {
     if (!call) return;
 
@@ -62,16 +64,41 @@ const MeetingRoom = () => {
       // Don't play for local participant
       if (event.participant.user.id !== localParticipant?.userId) {
         playSound('join');
+        window.dispatchEvent(new CustomEvent('dynamic-island', {
+          detail: { 
+            label: `${event.participant.user.name || 'someone'} joined`, 
+            icon: Users,
+            type: 'info'
+          }
+        }));
       }
     });
 
-    const unsubscribeLeave = call.on('call.session_participant_left', () => {
+    const unsubscribeLeave = call.on('call.session_participant_left', (event) => {
       playSound('leave');
+      window.dispatchEvent(new CustomEvent('dynamic-island', {
+        detail: { 
+          label: `${event.participant.user.name || 'Someone'} left`, 
+          icon: Users,
+          type: 'info'
+        }
+      }));
+    });
+
+    const unsubscribeRecording = call.on('call.recording_started', () => {
+      window.dispatchEvent(new CustomEvent('dynamic-island', {
+        detail: { 
+          label: 'Recording started', 
+          type: 'recording',
+          duration: 5000
+        }
+      }));
     });
 
     return () => {
       unsubscribe();
       unsubscribeLeave();
+      unsubscribeRecording();
     };
   }, [call, localParticipant?.userId, playSound]);
 
@@ -161,6 +188,9 @@ const MeetingRoom = () => {
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-bg-primary pt-4 text-fg-primary">
+      {/* Dynamic Island Morphing Notification */}
+      <DynamicIsland />
+
       {/* Keyboard HUD Confirmation */}
       <KeyboardHUD />
 
@@ -168,6 +198,11 @@ const MeetingRoom = () => {
       <MeetingStatsHUD isOpen={showStats} onClose={() => setShowStats(false)} />
 
       <div className="relative flex size-full items-center justify-center">
+        {/* Audio Visualizer floating in center-top */}
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+          <AudioVisualizer />
+        </div>
+
         <div className="flex size-full max-w-[1000px] items-center">
           <CallLayout />
         </div>
