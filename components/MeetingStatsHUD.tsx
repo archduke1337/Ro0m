@@ -15,11 +15,13 @@ const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
   const statsReport = useCallStatsReport();
 
   // Extract relevant stats from the report
-  const latency = statsReport?.publisherStats?.video?.latency || 0;
-  const resolution = statsReport?.publisherStats?.video?.resolution || 'N/A';
-  const bitrate = statsReport?.publisherStats?.video?.bitrate || 0;
-  const jitter = statsReport?.publisherStats?.video?.jitter || 0;
-  const packetLoss = statsReport?.publisherStats?.video?.packetLoss || 0;
+  const latency = statsReport?.publisherStats?.averageRoundTripTimeInMs || 0;
+  const width = statsReport?.publisherStats?.highestFrameWidth || 0;
+  const height = statsReport?.publisherStats?.highestFrameHeight || 0;
+  const resolution = width > 0 ? `${width}x${height}` : 'N/A';
+  const fps = statsReport?.publisherStats?.highestFramesPerSecond || 0;
+  const bitrate = (statsReport?.publisherStats?.totalBytesSent || 0) / 1024; // Simple kb estimate
+  const jitter = statsReport?.publisherStats?.averageJitterInMs || 0;
 
   const StatItem = ({ label, value, icon: Icon, unit = '' }: any) => (
     <div className="flex items-center justify-between py-2 border-b border-white/[0.05] last:border-0">
@@ -69,9 +71,9 @@ const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
             />
             <StatItem 
               label="Bitrate" 
-              value={(bitrate / 1000).toFixed(1)} 
+              value={bitrate.toFixed(1)} 
               icon={BarChart3} 
-              unit="kbps" 
+              unit="kb" 
             />
             <StatItem 
               label="Resolution" 
@@ -79,10 +81,9 @@ const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
               icon={Activity} 
             />
             <StatItem 
-              label="Packet Loss" 
-              value={packetLoss.toFixed(2)} 
-              icon={Shield} 
-              unit="%" 
+              label="FPS" 
+              value={fps} 
+              icon={Activity} 
             />
             <StatItem 
               label="Jitter" 
