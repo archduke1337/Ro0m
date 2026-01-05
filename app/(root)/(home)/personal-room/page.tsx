@@ -10,21 +10,21 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { getMeetingLink } from "@/lib/meeting-utils";
 
-const Table = ({
-  title,
-  description,
+const InfoRow = ({
+  label,
+  value,
 }: {
-  title: string;
-  description: string;
+  label: string;
+  value: string;
 }) => {
   return (
-    <div className="flex flex-col items-start gap-2 xl:flex-row">
-      <h1 className="text-base font-medium text-sky-1 lg:text-xl xl:min-w-32">
-        {title}:
-      </h1>
-      <h1 className="truncate text-sm font-bold max-sm:max-w-[320px] lg:text-xl">
-        {description}
-      </h1>
+    <div className="flex flex-col gap-1.5 py-4 border-b border-border-subtle last:border-b-0">
+      <span className="text-sm text-fg-tertiary uppercase tracking-wide">
+        {label}
+      </span>
+      <span className="text-base font-medium text-fg-primary truncate">
+        {value}
+      </span>
     </div>
   );
 };
@@ -39,14 +39,14 @@ const PersonalRoom = () => {
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
       toast({
-        title: "Success",
-        description: "Meeting invitation copied to clipboard!",
+        title: "Copied",
+        description: "Meeting invitation copied to clipboard",
       });
     }).catch((err) => {
       console.error("Copy failed:", err);
       toast({
         title: "Error",
-        description: "Failed to copy invitation. Please try again.",
+        description: "Failed to copy invitation",
         variant: "destructive",
       });
     });
@@ -75,19 +75,30 @@ const PersonalRoom = () => {
   const meetingLink = meetingId ? `${getMeetingLink(meetingId)}?personal=true` : '';
 
   return (
-    <section className="flex size-full flex-col gap-10 text-white">
-      <h1 className="text-xl font-bold lg:text-3xl">Personal Meeting Room</h1>
-      <div className="flex w-full flex-col gap-8 xl:max-w-[900px]">
-        <Table title="Topic" description={`${user?.username}'s Meeting Room`} />
-        <Table title="Meeting ID" description={meetingId!} />
-        <Table title="Invite Link" description={meetingLink} />
+    <section className="flex size-full flex-col gap-8 text-fg-primary">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">Personal Room</h1>
+        <p className="text-fg-secondary text-sm">Your permanent meeting space</p>
       </div>
-      <div className="flex gap-5">
-        <Button className="bg-blue-1" onClick={startRoom}>
+      
+      {/* Info Card */}
+      <div className="rounded-swift-lg border border-border-subtle bg-bg-elevated p-6 xl:max-w-[600px]">
+        <InfoRow label="Topic" value={`${user?.username || 'Your'}'s Meeting Room`} />
+        <InfoRow label="Meeting ID" value={meetingId || ''} />
+        <InfoRow label="Invite Link" value={meetingLink} />
+      </div>
+      
+      {/* Actions */}
+      <div className="flex gap-3">
+        <Button 
+          className="rounded-swift bg-fg-primary px-6 py-2.5 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity" 
+          onClick={startRoom}
+        >
           Start Meeting
         </Button>
         <Button
-          className="flex items-center gap-2 bg-dark-3"
+          className="rounded-swift bg-accent-muted border border-border-subtle px-6 py-2.5 text-sm font-medium text-fg-primary hover:bg-accent-hover transition-colors flex items-center gap-2"
           onClick={() => {
             const inviteText = `Join my meeting room!\n\nTopic: ${user?.username}'s Meeting Room\nMeeting ID: ${meetingId}\nJoin Link: ${meetingLink}`;
             copyToClipboard(inviteText);
@@ -95,10 +106,10 @@ const PersonalRoom = () => {
         >
           <Image
             src="/icons/copy.svg"
-            alt="copy"
-            width={20}
-            height={20}
-            className="object-contain"
+            alt=""
+            width={16}
+            height={16}
+            className="opacity-70"
           />
           Copy Invitation
         </Button>
