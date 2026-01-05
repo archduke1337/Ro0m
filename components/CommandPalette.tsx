@@ -295,7 +295,7 @@ const CommandPalette = () => {
         <div className="max-h-[360px] overflow-y-auto p-2">
           {filteredCommands.length === 0 ? (
             <div className="py-8 text-center text-fg-tertiary text-sm">
-              No commands found for "{search}"
+              No commands found for &quot;{search}&quot;
             </div>
           ) : (
             <>
