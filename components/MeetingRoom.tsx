@@ -21,6 +21,7 @@ import {
 } from './ui/dropdown-menu';
 import Loader from './Loader';
 import EndCallButton from './EndCallButton';
+import MeetingReactions from './MeetingReactions';
 import { cn } from '@/lib/utils';
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
@@ -68,6 +69,9 @@ const MeetingRoom = () => {
       <div className="fixed bottom-0 flex w-full items-center justify-center gap-3 pb-6">
         <CallControls onLeave={() => router.push(`/`)} />
 
+        {/* Reactions */}
+        <MeetingReactions />
+
         <DropdownMenu>
           <div className="flex items-center">
             <DropdownMenuTrigger className="cursor-pointer rounded-swift bg-accent-muted border border-border-subtle p-3 hover:bg-accent-hover transition-colors">
@@ -107,3 +111,4 @@ const MeetingRoom = () => {
 };
 
 export default MeetingRoom;
+

@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import ClientProviders from '@/components/ClientProviders';
+import { PageTransition } from '@/components/PageTransition';
 
 export const metadata: Metadata = {
   title: 'Ro0m',
@@ -20,7 +21,11 @@ const RootLayout = ({ children }: Readonly<{children: ReactNode}>) => {
           <Sidebar />
           
           <section className="flex min-h-screen flex-1 flex-col px-6 pb-6 pt-28 max-md:pb-14 sm:px-10 lg:px-14">
-            <div className="w-full max-w-[1400px] mx-auto">{children}</div>
+            <div className="w-full max-w-[1400px] mx-auto">
+              <PageTransition>
+                {children}
+              </PageTransition>
+            </div>
           </section>
         </div>
       </main>
@@ -29,3 +34,4 @@ const RootLayout = ({ children }: Readonly<{children: ReactNode}>) => {
 };
 
 export default RootLayout;
+
