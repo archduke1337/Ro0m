@@ -28,6 +28,11 @@ const StreamVideoProvider = ({ children }: { children: ReactNode }) => {
     });
 
     setVideoClient(client);
+
+    // Cleanup: disconnect client on unmount to prevent memory leaks
+    return () => {
+      client.disconnectUser().catch(console.error);
+    };
   }, [user, isLoaded]);
 
   if (!videoClient) return <Loader />;

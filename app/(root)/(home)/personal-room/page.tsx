@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useGetCallById } from "@/hooks/useGetCallById";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { getMeetingLink } from "@/lib/meeting-utils";
 
 const Table = ({
   title,
@@ -70,20 +71,8 @@ const PersonalRoom = () => {
 
     router.push(`/meeting/${meetingId}?personal=true`);
   };
-
-  const getMeetingLink = () => {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    // In production, use the configured URL
-    if (baseUrl && !baseUrl.includes('localhost')) {
-      return `${baseUrl}/meeting/${meetingId}?personal=true`;
-    }
-    // In development or if BASE_URL is not set, use the current origin
-    return typeof window !== 'undefined' 
-      ? `${window.location.origin}/meeting/${meetingId}?personal=true`
-      : `/meeting/${meetingId}?personal=true`;
-  };
   
-  const meetingLink = getMeetingLink();
+  const meetingLink = meetingId ? `${getMeetingLink(meetingId)}?personal=true` : '';
 
   return (
     <section className="flex size-full flex-col gap-10 text-white">

@@ -13,6 +13,7 @@ import { Textarea } from './ui/textarea';
 import ReactDatePicker from 'react-datepicker';
 import { useToast } from './ui/use-toast';
 import { Input } from './ui/input';
+import { getMeetingLink } from '@/lib/meeting-utils';
 
 const initialValues = {
   dateTime: new Date(),
@@ -66,22 +67,8 @@ const MeetingTypeList = () => {
   };
 
   if (!client || !user) return <Loader />;
-
-  const getMeetingLink = () => {
-    if (!callDetail?.id) return '';
-    
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    // In production, use the configured URL
-    if (baseUrl && !baseUrl.includes('localhost')) {
-      return `${baseUrl}/meeting/${callDetail.id}`;
-    }
-    // In development or if BASE_URL is not set, use the current origin
-    return typeof window !== 'undefined' 
-      ? `${window.location.origin}/meeting/${callDetail.id}`
-      : `/meeting/${callDetail.id}`;
-  };
   
-  const meetingLink = getMeetingLink();
+  const meetingLink = callDetail?.id ? getMeetingLink(callDetail.id) : '';
 
   return (
     <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
