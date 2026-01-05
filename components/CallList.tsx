@@ -4,10 +4,11 @@ import { Call, CallRecording } from "@stream-io/video-react-sdk";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Loader from "./Loader";
 import { useGetCalls } from "@/hooks/useGetCalls";
 import MeetingCard from "./MeetingCard";
 import { useToast } from "./ui/use-toast";
+import { CallListSkeleton } from "./Skeleton";
+import { Calendar, Clock, Video } from "lucide-react";
 
 type Meeting = Call | CallRecording;
 
@@ -49,13 +50,30 @@ const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
     if (type === "recordings") fetchRecordings();
   }, [type, callRecordings, toast]);
 
-  if (isLoading) return <Loader />;
+  if (isLoading) return <CallListSkeleton />;
 
   const calls: Meeting[] =
     type === "ended" ? (endedCalls ?? []) : type === "upcoming" ? (upcomingCalls ?? []) : recordings ?? [];
 
-  const noCallsMessage =
-    type === "ended" ? "No Previous Calls" : type === "upcoming" ? "No Upcoming Calls" : "No Recordings";
+  const emptyStateConfig = {
+    ended: {
+      icon: <Clock className="size-12 text-fg-tertiary" />,
+      title: "No Previous Meetings",
+      description: "Your past meetings will appear here",
+    },
+    upcoming: {
+      icon: <Calendar className="size-12 text-fg-tertiary" />,
+      title: "No Upcoming Meetings",
+      description: "Schedule a meeting to get started",
+    },
+    recordings: {
+      icon: <Video className="size-12 text-fg-tertiary" />,
+      title: "No Recordings",
+      description: "Your meeting recordings will appear here",
+    },
+  };
+
+  const emptyState = emptyStateConfig[type];
 
   const openMeeting = (callId: string) => router.push(`/meeting/${callId}`);
 
@@ -100,10 +118,17 @@ const CallList = ({ type }: { type: "ended" | "upcoming" | "recordings" }) => {
           );
         })
       ) : (
-        <p className="col-span-full text-center text-white">{noCallsMessage}</p>
+        <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
+          <div className="flex-center size-20 rounded-swift-lg bg-accent-muted border border-border-subtle mb-4">
+            {emptyState.icon}
+          </div>
+          <h3 className="text-lg font-semibold text-fg-primary mb-1">{emptyState.title}</h3>
+          <p className="text-sm text-fg-secondary">{emptyState.description}</p>
+        </div>
       )}
     </div>
   );
 };
 
 export default CallList;
+

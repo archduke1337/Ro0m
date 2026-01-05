@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { SignedIn, UserButton } from '@clerk/nextjs';
@@ -19,7 +21,19 @@ const Navbar = () => {
           Ro0m
         </p>
       </Link>
-      <div className="flex-between gap-5">
+      <div className="flex-between gap-4">
+        {/* Command Palette Trigger */}
+        <button 
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-swift bg-accent-muted border border-border-subtle hover:bg-accent-hover transition-colors group"
+        >
+          <span className="text-sm text-fg-tertiary group-hover:text-fg-secondary transition-colors">Search...</span>
+          <div className="flex items-center gap-0.5">
+            <kbd className="px-1.5 py-0.5 text-xs font-mono rounded bg-bg-tertiary text-fg-tertiary">⌘</kbd>
+            <kbd className="px-1.5 py-0.5 text-xs font-mono rounded bg-bg-tertiary text-fg-tertiary">K</kbd>
+          </div>
+        </button>
+
         <SignedIn>
           <UserButton 
             afterSignOutUrl="/sign-in"
@@ -38,3 +52,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

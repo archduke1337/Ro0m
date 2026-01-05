@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import HomeCard from './HomeCard';
@@ -14,6 +14,7 @@ import ReactDatePicker from 'react-datepicker';
 import { useToast } from './ui/use-toast';
 import { Input } from './ui/input';
 import { getMeetingLink } from '@/lib/meeting-utils';
+import { HomeCardSkeleton } from './Skeleton';
 
 const initialValues = {
   dateTime: new Date(),
@@ -31,6 +32,23 @@ const MeetingTypeList = () => {
   const client = useStreamVideoClient();
   const { user } = useUser();
   const { toast } = useToast();
+
+  // Listen for keyboard shortcut events
+  useEffect(() => {
+    const handleInstantMeeting = () => setMeetingState('isInstantMeeting');
+    const handleJoinMeeting = () => setMeetingState('isJoiningMeeting');
+    const handleScheduleMeeting = () => setMeetingState('isScheduleMeeting');
+
+    window.addEventListener('open-instant-meeting', handleInstantMeeting);
+    window.addEventListener('open-join-meeting', handleJoinMeeting);
+    window.addEventListener('open-schedule-meeting', handleScheduleMeeting);
+
+    return () => {
+      window.removeEventListener('open-instant-meeting', handleInstantMeeting);
+      window.removeEventListener('open-join-meeting', handleJoinMeeting);
+      window.removeEventListener('open-schedule-meeting', handleScheduleMeeting);
+    };
+  }, []);
 
   const createMeeting = async () => {
     if (!client || !user) return;
@@ -66,7 +84,16 @@ const MeetingTypeList = () => {
     }
   };
 
-  if (!client || !user) return <Loader />;
+  if (!client || !user) {
+    return (
+      <section className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <HomeCardSkeleton />
+        <HomeCardSkeleton />
+        <HomeCardSkeleton />
+        <HomeCardSkeleton />
+      </section>
+    );
+  }
   
   const meetingLink = callDetail?.id ? getMeetingLink(callDetail.id) : '';
 
@@ -82,21 +109,18 @@ const MeetingTypeList = () => {
         img="/icons/join-meeting.svg"
         title="Join Meeting"
         description="via invitation link"
-        className="bg-blue-1"
         handleClick={() => setMeetingState('isJoiningMeeting')}
       />
       <HomeCard
         img="/icons/schedule.svg"
         title="Schedule Meeting"
         description="Plan your meeting"
-        className="bg-purple-1"
         handleClick={() => setMeetingState('isScheduleMeeting')}
       />
       <HomeCard
         img="/icons/recordings.svg"
         title="View Recordings"
         description="Meeting Recordings"
-        className="bg-yellow-1"
         handleClick={() => router.push('/recordings')}
       />
 
@@ -104,23 +128,24 @@ const MeetingTypeList = () => {
         <MeetingModal
           isOpen={meetingState === 'isScheduleMeeting'}
           onClose={() => setMeetingState(undefined)}
-          title="Create Meeting"
+          title="Schedule Meeting"
           handleClick={createMeeting}
         >
-          <div className="flex flex-col gap-2.5">
-            <label className="text-base font-normal leading-[22.4px] text-sky-2">
-              Add a description
+          <div className="flex flex-col gap-3">
+            <label className="text-sm font-medium text-fg-secondary">
+              Description
             </label>
             <Textarea
-              className="border-none bg-dark-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+              placeholder="Add a description..."
+              className="border border-border-subtle bg-bg-tertiary rounded-swift focus-visible:ring-1 focus-visible:ring-fg-primary/20 focus-visible:ring-offset-0 text-fg-primary placeholder:text-fg-tertiary resize-none"
               onChange={(e) =>
                 setValues({ ...values, description: e.target.value })
               }
             />
           </div>
-          <div className="flex w-full flex-col gap-2.5">
-            <label className="text-base font-normal leading-[22.4px] text-sky-2">
-              Select Date and Time
+          <div className="flex w-full flex-col gap-3">
+            <label className="text-sm font-medium text-fg-secondary">
+              Date and Time
             </label>
             <ReactDatePicker
               selected={values.dateTime}
@@ -130,7 +155,7 @@ const MeetingTypeList = () => {
               timeIntervals={15}
               timeCaption="time"
               dateFormat="MMMM d, yyyy h:mm aa"
-              className="w-full rounded bg-dark-3 p-2 focus:outline-none"
+              className="w-full rounded-swift border border-border-subtle bg-bg-tertiary p-3 text-fg-primary focus:outline-none focus:ring-1 focus:ring-fg-primary/20"
             />
           </div>
         </MeetingModal>
@@ -153,22 +178,22 @@ const MeetingTypeList = () => {
       <MeetingModal
         isOpen={meetingState === 'isJoiningMeeting'}
         onClose={() => setMeetingState(undefined)}
-        title="Type the link here"
+        title="Join Meeting"
         className="text-center"
         buttonText="Join Meeting"
         handleClick={() => router.push(values.link)}
       >
         <Input
-          placeholder="Meeting link"
+          placeholder="Paste meeting link here..."
           onChange={(e) => setValues({ ...values, link: e.target.value })}
-          className="border-none bg-dark-3 focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="border border-border-subtle bg-bg-tertiary rounded-swift focus-visible:ring-1 focus-visible:ring-fg-primary/20 focus-visible:ring-offset-0 text-fg-primary placeholder:text-fg-tertiary"
         />
       </MeetingModal>
 
       <MeetingModal
         isOpen={meetingState === 'isInstantMeeting'}
         onClose={() => setMeetingState(undefined)}
-        title="Start an Instant Meeting"
+        title="Start Instant Meeting"
         className="text-center"
         buttonText="Start Meeting"
         handleClick={createMeeting}
@@ -178,3 +203,4 @@ const MeetingTypeList = () => {
 };
 
 export default MeetingTypeList;
+
