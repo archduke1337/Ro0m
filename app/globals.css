@@ -223,6 +223,52 @@
 }
 
 /* ======== Animation Classes ======== */
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s infinite;
+}
+
+@keyframes bounce-subtle {
+  0%,
+  100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Active Speaker Highlighting */
+.str-video__participant-view--speaking {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.str-video__participant-view--speaking::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid white;
+  border-radius: inherit;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  animation: breathe-border 2s infinite ease-in-out;
+  z-index: 10;
+}
+
+@keyframes breathe-border {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.005);
+  }
+}
+
 .show-block {
   width: 100%;
   max-width: 350px;

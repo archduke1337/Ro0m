@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useClerk } from '@clerk/nextjs';
+import { useSounds } from '@/hooks/useSounds';
 
 interface CommandItem {
   id: string;
@@ -36,12 +37,20 @@ const CommandPalette = () => {
   const router = useRouter();
   const { signOut } = useClerk();
   const { setTheme } = useTheme();
+  const { playSound } = useSounds();
 
   const navigate = useCallback((path: string) => {
     router.push(path);
     setOpen(false);
     setSearch('');
   }, [router]);
+
+  // Play sound when opening
+  useEffect(() => {
+    if (open) {
+      playSound('ping');
+    }
+  }, [open, playSound]);
 
   const commands: CommandItem[] = [
     // Navigation

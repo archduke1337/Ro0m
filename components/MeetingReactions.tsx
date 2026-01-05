@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useSounds } from '@/hooks/useSounds';
 
 interface Reaction {
   id: string;
@@ -22,18 +23,20 @@ const REACTIONS = [
 const MeetingReactions = () => {
   const [reactions, setReactions] = useState<Reaction[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const { playSound } = useSounds();
 
   const addReaction = useCallback((emoji: string) => {
     const id = crypto.randomUUID();
     const x = Math.random() * 60 - 30; // Random horizontal offset
     
     setReactions((prev) => [...prev, { id, emoji, x }]);
+    playSound('pop');
     
     // Remove reaction after animation completes
     setTimeout(() => {
       setReactions((prev) => prev.filter((r) => r.id !== id));
     }, 3000);
-  }, []);
+  }, [playSound]);
 
   return (
     <div className="relative">
