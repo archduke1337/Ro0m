@@ -11,7 +11,7 @@ import {
   useCallStateHooks,
 } from '@stream-io/video-react-sdk';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Users, LayoutList, Hand, Mic, MicOff, Video, VideoOff, Activity } from 'lucide-react';
+import { Users, LayoutList, Hand, Mic, MicOff, Video, VideoOff, Activity, Palette, Focus } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -29,6 +29,7 @@ import AudioVisualizer from './AudioVisualizer';
 import DynamicIsland from './DynamicIsland';
 import { cn } from '@/lib/utils';
 import { useSounds } from '@/hooks/useSounds';
+import { usePaletteSync } from '@/hooks/usePaletteSync';
 import { useEffect } from 'react';
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
@@ -41,6 +42,9 @@ const MeetingRoom = () => {
   const [layout, setLayout] = useState<CallLayoutType>('speaker-left');
   const [showParticipants, setShowParticipants] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [isPaletteSyncEnabled, setIsPaletteSyncEnabled] = useState(false);
+  const [isFocusModeEnabled, setIsFocusModeEnabled] = useState(false);
+  
   const { 
     useCallCallingState, 
     useLocalParticipant,
@@ -48,6 +52,9 @@ const MeetingRoom = () => {
     useCameraState 
   } = useCallStateHooks();
   const { playSound } = useSounds();
+  
+  // Activate Palette Sync
+  usePaletteSync(isPaletteSyncEnabled);
 
   const localParticipant = useLocalParticipant();
   const isHandRaised = (localParticipant as any)?.isHandRaised;
@@ -166,12 +173,36 @@ const MeetingRoom = () => {
           setShowStats(prev => !prev);
           playSound('ping');
           break;
+        case 'p':
+          e.preventDefault();
+          setIsPaletteSyncEnabled(prev => !prev);
+          playSound('click');
+          window.dispatchEvent(new CustomEvent('dynamic-island', {
+            detail: { 
+              label: isPaletteSyncEnabled ? 'Palette Sync Off' : 'Palette Sync On', 
+              icon: Palette,
+              type: 'info'
+            }
+          }));
+          break;
+        case 'f':
+          e.preventDefault();
+          setIsFocusModeEnabled(prev => !prev);
+          playSound('click');
+          window.dispatchEvent(new CustomEvent('dynamic-island', {
+            detail: { 
+              label: isFocusModeEnabled ? 'Focus Mode Off' : 'Focus Mode On', 
+              icon: Focus,
+              type: 'info'
+            }
+          }));
+          break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [microphone, camera, isMute, isCameraMute, toggleHand, playSound]);
+  }, [microphone, camera, isMute, isCameraMute, toggleHand, playSound, isPaletteSyncEnabled, isFocusModeEnabled]);
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -187,7 +218,10 @@ const MeetingRoom = () => {
   };
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-bg-primary pt-4 text-fg-primary">
+    <section className={cn(
+      "relative h-screen w-full overflow-hidden bg-bg-primary pt-4 text-fg-primary transition-colors duration-1000",
+      isFocusModeEnabled && "focus-mode-active"
+    )}>
       {/* Dynamic Island Morphing Notification */}
       <DynamicIsland />
 

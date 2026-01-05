@@ -26,6 +26,32 @@
     --border-default: 0 0 0 / 0.1;
     --border-subtle: 0 0 0 / 0.05;
     --border-strong: 0 0 0 / 0.15;
+
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    /* Dynamic Accents - Updated by Palette Sync */
+    --accent-primary: 255, 255, 255;
+    --accent-primary-muted: 255, 255, 255, 0.15;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 1rem;
   }
 
   .dark {
@@ -249,12 +275,32 @@
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid white;
+  border: 2px solid rgb(var(--accent-primary));
   border-radius: inherit;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(var(--accent-primary), 0.2);
   pointer-events: none;
   animation: breathe-border 2s infinite ease-in-out;
   z-index: 10;
+}
+
+/* Cinematic Focus Mode */
+.focus-mode-active
+  .str-video__participant-view:not(.str-video__participant-view--speaking) {
+  opacity: 0.4;
+  filter: grayscale(0.5) blur(2px);
+  scale: 0.98;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.focus-mode-active .str-video__participant-view--speaking {
+  scale: 1.02;
+  z-index: 20;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portrait-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 @keyframes breathe-border {

@@ -38,6 +38,8 @@ const shortcutGroups: ShortcutGroup[] = [
       { keys: ['V'], description: 'Toggle Video' },
       { keys: ['H'], description: 'Raise/Lower Hand' },
       { keys: ['I'], description: 'Toggle Info Stats' },
+      { keys: ['P'], description: 'Toggle Palette Sync' },
+      { keys: ['F'], description: 'Toggle Focus Mode' },
     ],
   },
   {
