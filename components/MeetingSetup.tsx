@@ -10,10 +10,18 @@ import {
 import Alert from './Alert';
 import { Button } from './ui/button';
 
+const isCallNotFoundError = (error: unknown) => {
+  if (!(error instanceof Error)) return false;
+
+  return error.message.includes("Can't find call with id");
+};
+
 const MeetingSetup = ({
   setIsSetupComplete,
+  allowCreateOnJoin,
 }: {
   setIsSetupComplete: (value: boolean) => void;
+  allowCreateOnJoin?: boolean;
 }) => {
   // https://getstream.io/video/docs/react/guides/call-and-participant-state/#call-state
   const { useCallEndedAt, useCallStartsAt } = useCallStateHooks();
@@ -109,6 +117,28 @@ const MeetingSetup = ({
             setIsSetupComplete(true);
           } catch (error) {
             console.error('Failed to join meeting:', error);
+
+            if (allowCreateOnJoin && isCallNotFoundError(error)) {
+              try {
+                await call.getOrCreate({
+                  data: {
+                    starts_at: new Date().toISOString(),
+                  },
+                });
+
+                await call.join();
+                setIsSetupComplete(true);
+                return;
+              } catch (createError) {
+                console.error('Failed to auto-create personal room:', createError);
+              }
+            }
+
+            if (isCallNotFoundError(error)) {
+              setJoinError('This meeting does not exist yet. Ask the host to start it first.');
+              return;
+            }
+
             setJoinError('Unable to join meeting. Please try again.');
           } finally {
             setIsJoining(false);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { StreamCall, StreamTheme } from '@stream-io/video-react-sdk';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { Loader } from 'lucide-react';
 
 import { useGetCallById } from '@/hooks/useGetCallById';
@@ -13,6 +13,8 @@ import MeetingRoom from '@/components/MeetingRoom';
 
 const MeetingPage = () => {
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const isPersonalRoom = Boolean(searchParams.get('personal'));
   const { isLoaded, user } = useUser();
   const { call, isCallLoading } = useGetCallById(id);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
@@ -36,7 +38,10 @@ const MeetingPage = () => {
         <StreamTheme>
 
         {!isSetupComplete ? (
-          <MeetingSetup setIsSetupComplete={setIsSetupComplete} />
+          <MeetingSetup
+            setIsSetupComplete={setIsSetupComplete}
+            allowCreateOnJoin={isPersonalRoom}
+          />
         ) : (
           <MeetingRoom />
         )}

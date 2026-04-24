@@ -27,13 +27,14 @@ export const useGetCallById = (id?: string | string[] | null) => {
         if (isCancelled) return;
 
         if (calls.length > 0) setCall(calls[0]);
-        else setCall(client.call('default', callId));
+        else setCall(undefined);
 
         setIsCallLoading(false);
       } catch (error) {
         if (isCancelled) return;
 
         console.error(error);
+        setCall(undefined);
         setIsCallLoading(false);
       }
     };

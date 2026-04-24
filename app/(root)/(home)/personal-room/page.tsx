@@ -3,9 +3,9 @@
 import { useUser } from "@clerk/nextjs";
 import { useStreamVideoClient } from "@stream-io/video-react-sdk";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Image from "next/image";
 
-import { useGetCallById } from "@/hooks/useGetCallById";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { getMeetingLink } from "@/lib/meeting-utils";
@@ -34,6 +34,7 @@ const PersonalRoom = () => {
   const { user } = useUser();
   const client = useStreamVideoClient();
   const { toast } = useToast();
+  const [isStartingRoom, setIsStartingRoom] = useState(false);
   
   const copyToClipboard = (text: string) => {
     if (!text) return;
@@ -54,22 +55,40 @@ const PersonalRoom = () => {
 
   const meetingId = user?.id;
 
-  const { call } = useGetCallById(meetingId);
-
   const startRoom = async () => {
     if (!client || !user || !meetingId) return;
 
-    const newCall = client.call("default", meetingId);
+    setIsStartingRoom(true);
 
-    if (!call) {
-      await newCall.getOrCreate({
+    try {
+      const personalRoomCall = client.call("default", meetingId);
+
+      await personalRoomCall.getOrCreate({
         data: {
           starts_at: new Date().toISOString(),
+          custom: {
+            description: `${user.username || 'Your'}'s Meeting Room`,
+          },
         },
       });
-    }
 
-    router.push(`/meeting/${meetingId}?personal=true`);
+      router.push(`/meeting/${meetingId}?personal=true`);
+    } catch (error) {
+      console.error("Failed to start personal room:", error);
+
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : "Please verify Stream credentials and permissions.";
+
+      toast({
+        title: "Unable to start personal room",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsStartingRoom(false);
+    }
   };
   
   const meetingLink = meetingId ? `${getMeetingLink(meetingId)}?personal=true` : '';
@@ -93,10 +112,10 @@ const PersonalRoom = () => {
       <div className="flex gap-3">
         <Button 
           className="rounded-swift bg-fg-primary px-6 py-2.5 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity" 
-          disabled={!meetingId}
+          disabled={!meetingId || isStartingRoom}
           onClick={startRoom}
         >
-          Start Meeting
+          {isStartingRoom ? "Starting..." : "Start Meeting"}
         </Button>
         <Button
           className="rounded-swift bg-accent-muted border border-border-subtle px-6 py-2.5 text-sm font-medium text-fg-primary hover:bg-accent-hover transition-colors flex items-center gap-2"
