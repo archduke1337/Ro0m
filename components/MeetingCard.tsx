@@ -4,7 +4,6 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { avatarImages } from "@/constants";
 import { useToast } from "./ui/use-toast";
 
 interface MeetingCardProps {
@@ -45,25 +44,7 @@ const MeetingCard = ({
       </div>
       
       <div className={cn("flex items-center justify-between pt-4 border-t border-border-subtle", {})}>
-        <div className="relative flex w-full max-sm:hidden">
-          {avatarImages.slice(0, 3).map((img, index) => (
-            <Image
-              key={index}
-              src={img}
-              alt="attendee"
-              width={32}
-              height={32}
-              className={cn(
-                "rounded-full border-2 border-bg-elevated",
-                { "absolute": index > 0 }
-              )}
-              style={{ top: 0, left: index * 22 }}
-            />
-          ))}
-          <div className="flex-center absolute left-[70px] size-8 rounded-full border-2 border-bg-elevated bg-bg-tertiary text-xs font-medium text-fg-secondary">
-            +5
-          </div>
-        </div>
+        <div className="w-full text-sm text-fg-tertiary">Meeting details</div>
         
         {!isPreviousMeeting && (
           <div className="flex gap-2">
