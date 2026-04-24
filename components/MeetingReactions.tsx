@@ -83,6 +83,7 @@ const MeetingReactions = () => {
                 {REACTIONS.map(({ emoji, label }) => (
                   <motion.button
                     key={emoji}
+                    type="button"
                     whileHover={{ scale: 1.2 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => {
@@ -107,6 +108,7 @@ const MeetingReactions = () => {
 
         {/* Toggle Button */}
         <motion.button
+          type="button"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
@@ -117,6 +119,7 @@ const MeetingReactions = () => {
           )}
           aria-label="Open reactions"
           aria-expanded={isOpen}
+          aria-pressed={isOpen}
         >
           <span className="text-xl">😊</span>
         </motion.button>

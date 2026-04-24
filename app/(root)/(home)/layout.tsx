@@ -8,7 +8,7 @@ import { PageTransition } from '@/components/PageTransition';
 
 export const metadata: Metadata = {
   title: 'Ro0m',
-  description: 'A workspace for your team, powered by Stream Chat and Clerk.',
+  description: 'A workspace for your team, powered by Stream Video and Clerk.',
 };
 
 const RootLayout = ({ children }: Readonly<{children: ReactNode}>) => {

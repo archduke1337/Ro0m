@@ -8,7 +8,6 @@ import HomeCard from './HomeCard';
 import MeetingModal from './MeetingModal';
 import { Call, useStreamVideoClient } from '@stream-io/video-react-sdk';
 import { useUser } from '@clerk/nextjs';
-import Loader from './Loader';
 import { Textarea } from './ui/textarea';
 import ReactDatePicker from 'react-datepicker';
 import { useToast } from './ui/use-toast';
@@ -66,6 +65,7 @@ const MeetingTypeList = () => {
       await call.getOrCreate({
         data: {
           starts_at: startsAt,
+          members: [{ user_id: user.id }],
           custom: {
             description,
           },
@@ -81,6 +81,29 @@ const MeetingTypeList = () => {
     } catch (error) {
       console.error(error);
       toast({ title: 'Failed to create Meeting' });
+    }
+  };
+
+  const joinMeeting = () => {
+    const rawLink = values.link.trim();
+
+    if (!rawLink) {
+      toast({ title: 'Please paste a meeting link' });
+      return;
+    }
+
+    try {
+      const parsedUrl = new URL(rawLink, window.location.origin);
+
+      if (!parsedUrl.pathname.startsWith('/meeting/')) {
+        toast({ title: 'Invalid meeting link', description: 'Please provide a valid Ro0m meeting URL.' });
+        return;
+      }
+
+      setMeetingState(undefined);
+      router.push(`${parsedUrl.pathname}${parsedUrl.search}`);
+    } catch {
+      toast({ title: 'Invalid meeting link', description: 'Please provide a valid URL.' });
     }
   };
 
@@ -136,7 +159,7 @@ const MeetingTypeList = () => {
               Description
             </label>
             <Textarea
-              placeholder="Add a description..."
+              placeholder="Add a description…"
               className="border border-border-subtle bg-bg-tertiary rounded-swift focus-visible:ring-1 focus-visible:ring-fg-primary/20 focus-visible:ring-offset-0 text-fg-primary placeholder:text-fg-tertiary resize-none"
               onChange={(e) =>
                 setValues({ ...values, description: e.target.value })
@@ -149,7 +172,10 @@ const MeetingTypeList = () => {
             </label>
             <ReactDatePicker
               selected={values.dateTime}
-              onChange={(date) => setValues({ ...values, dateTime: date! })}
+              onChange={(date) => {
+                if (!date) return;
+                setValues({ ...values, dateTime: date });
+              }}
               showTimeSelect
               timeFormat="HH:mm"
               timeIntervals={15}
@@ -181,10 +207,10 @@ const MeetingTypeList = () => {
         title="Join Meeting"
         className="text-center"
         buttonText="Join Meeting"
-        handleClick={() => router.push(values.link)}
+        handleClick={joinMeeting}
       >
         <Input
-          placeholder="Paste meeting link here..."
+          placeholder="Paste meeting link here…"
           onChange={(e) => setValues({ ...values, link: e.target.value })}
           className="border border-border-subtle bg-bg-tertiary rounded-swift focus-visible:ring-1 focus-visible:ring-fg-primary/20 focus-visible:ring-offset-0 text-fg-primary placeholder:text-fg-tertiary"
         />

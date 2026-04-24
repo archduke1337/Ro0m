@@ -26,11 +26,11 @@ const Navbar = () => {
         {/* Command Palette Trigger */}
         <button 
           type="button"
-          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true }))}
           className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-swift bg-accent-muted border border-border-subtle hover:bg-accent-hover transition-colors group"
           aria-label="Open command palette"
         >
-          <span className="text-sm text-fg-tertiary group-hover:text-fg-secondary transition-colors">Search...</span>
+          <span className="text-sm text-fg-tertiary group-hover:text-fg-secondary transition-colors">Search…</span>
           <div className="flex items-center gap-0.5">
             <kbd className="px-1.5 py-0.5 text-xs font-mono rounded bg-bg-tertiary text-fg-tertiary">⌘</kbd>
             <kbd className="px-1.5 py-0.5 text-xs font-mono rounded bg-bg-tertiary text-fg-tertiary">K</kbd>

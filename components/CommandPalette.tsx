@@ -330,7 +330,7 @@ const CommandPalette = () => {
             <input
               id="command-palette-input"
               type="text"
-              placeholder="Type a command or search..."
+              placeholder="Type a command or search…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="flex-1 bg-transparent text-fg-primary text-base placeholder:text-fg-tertiary focus:outline-none"

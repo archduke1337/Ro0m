@@ -1,87 +1,73 @@
-# Ro0m 🎥  
-An open-source, browser-based alternative to Zoom.  
+# Ro0m
 
-Ro0m is a lightweight video conferencing application that lets you create and join rooms instantly — no signups, no downloads. It’s built with **Next.js**, **WebRTC**, and **Tailwind CSS**, and can be self-hosted or deployed to the cloud easily.  
+Ro0m is an authenticated video meeting app built with Next.js App Router, Clerk, and Stream Video.
+Users can create instant meetings, schedule upcoming calls, join via links, and review previous calls and recordings.
 
-🔗 **Live Demo**: [ro0m.vercel.app](https://ro0m.vercel.app)
+## Features
 
----
+- Clerk-based authentication (sign in and sign up flows)
+- Instant meetings, scheduled meetings, and join-by-link
+- Personal room generation with shareable invite links
+- Upcoming and previous call views with call-state categorization
+- Recordings page for completed meeting sessions
+- Keyboard shortcuts, command palette, and accessibility-oriented controls
+- Responsive UI built with Tailwind CSS and shadcn-style primitives
 
-## ✨ Features
+## Tech Stack
+
+- Next.js 14 (App Router)
+- React 18 + TypeScript
+- Clerk for authentication
+- Stream Video SDK (`@stream-io/video-react-sdk` and server token generation)
+- Tailwind CSS + Radix UI primitives
+
+## Prerequisites
+
+- Node.js 18+
+- npm (or another compatible package manager)
+- A Clerk project
+- A Stream Video project/API credentials
+
+## Environment Variables
+
+Create a `.env.local` file in the project root with:
+
+```bash
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# Stream Video
+NEXT_PUBLIC_STREAM_API_KEY=your_stream_api_key
+STREAM_SECRET_KEY=your_stream_secret_key
+
+# Optional, used for invite links, robots, and sitemap metadata
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
-- 🔊 **Real-time video & audio** powered by WebRTC  
-- 💬 **Chat support** during calls  
-- 🖥️ **Screen sharing**  
-- 📱 **Responsive design** (works on desktop & mobile)  
-- 🔗 **Instant room creation** with unique shareable links  
-- 🌐 **Self-hostable** — deploy on your own server or Vercel  
-```
----
 
-## 🛠️ Tech Stack
-```
-- [Next.js](https://nextjs.org/) – React framework  
-- [WebRTC](https://webrtc.org/) – Real-time communication  
-- [Tailwind CSS](https://tailwindcss.com/) – Modern utility-first styling  
-- [Vercel](https://vercel.com/) – Deployment & hosting  
-```
----
+## Getting Started
 
-## 🚀 Getting Started
-
-### Prerequisites
-Make sure you have the following installed:
-- [Node.js](https://nodejs.org/) (v16 or later)
-- npm or yarn package manager
-
-### Installation
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/archduke1337/Ro0m.git
-   cd Ro0m
-
-Install dependencies:
+```bash
 npm install
-# or
-yarn install
-
-Run the development server:
 npm run dev
-# or
-yarn dev
-
-Open your browser at http://localhost:3000 🎉
-
-⚙️ Environment Variables
-```
-NEXT_PUBLIC_PEER_SERVER=your-peer-server
-NEXT_PUBLIC_TURN_SERVER=your-turn-server
-NEXT_PUBLIC_STUN_SERVER=your-stun-server
-```
-👉 You can use free Google STUN servers or deploy your own TURN server for reliability.
-
-☁️ Deployment
-Deploy instantly with Vercel:
-Fork this repo
-Push to your GitHub account
-Import the project into Vercel
-Add environment variables (if any)
-Done 🎉 — your Ro0m is live!
-
-🤝 Contributing
-Contributions are welcome!
-```
-Fork the project
-Create a feature branch (git checkout -b feature/awesome-feature)
-Commit your changes (git commit -m 'Add awesome feature')
-Push to the branch (git push origin feature/awesome-feature)
-Open a Pull Request
 ```
 
-📜 License
-This project is licensed under the MIT License – see the LICENSE file for details.
+Open `http://localhost:3000`.
 
+## Available Scripts
 
+```bash
+npm run dev    # start development server
+npm run build  # production build
+npm run start  # run production build
+npm run lint   # lint the codebase
+```
 
-The open-source community ❤️
+## Deployment
+
+Deploy to Vercel (or any Node-compatible host) and configure the same environment variables from `.env.local`.
+
+## License
+
+This project is licensed under the MIT License.
 

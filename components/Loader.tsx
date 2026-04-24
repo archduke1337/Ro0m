@@ -11,7 +11,7 @@ const Loader = () => {
           height={40}
           className="animate-spin opacity-60"
         />
-        <span className="text-sm text-fg-tertiary">Loading...</span>
+        <span className="text-sm text-fg-tertiary">Loading…</span>
       </div>
     </div>
   );

@@ -34,6 +34,7 @@ const ThemeToggle = () => {
     <div className="flex items-center gap-1 p-1 rounded-swift bg-accent-muted border border-border-subtle">
       {themes.map(({ id, icon: Icon, label }) => (
         <button
+          type="button"
           key={id}
           onClick={() => setTheme(id)}
           className={cn(

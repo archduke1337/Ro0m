@@ -115,7 +115,7 @@ const MeetingSetup = ({
           }
         }}
       >
-        {isJoining ? 'Joining...' : 'Join Meeting'}
+        {isJoining ? 'Joining…' : 'Join Meeting'}
       </Button>
 
       {joinError && (

@@ -14,9 +14,32 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const getMetadataBase = () => {
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_BASE_URL?.trim();
+  const fallbackBaseUrl = 'http://localhost:3000';
+
+  try {
+    return new URL(configuredBaseUrl || fallbackBaseUrl);
+  } catch {
+    return new URL(fallbackBaseUrl);
+  }
+};
+
 export const metadata: Metadata = {
   title: "Ro0m",
   description: "Clerk-authenticated video meetings built with Next.js and Stream Video.",
+  metadataBase: getMetadataBase(),
+  openGraph: {
+    title: 'Ro0m',
+    description: 'Clerk-authenticated video meetings built with Next.js and Stream Video.',
+    siteName: 'Ro0m',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ro0m',
+    description: 'Clerk-authenticated video meetings built with Next.js and Stream Video.',
+  },
   icons: {
     icon: "/icons/logo.svg",
   },
