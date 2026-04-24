@@ -28,6 +28,7 @@ const MeetingTypeList = () => {
   >(undefined);
   const [values, setValues] = useState(initialValues);
   const [callDetail, setCallDetail] = useState<Call>();
+  const [isCreating, setIsCreating] = useState(false);
   const client = useStreamVideoClient();
   const { user } = useUser();
   const { toast } = useToast();
@@ -50,37 +51,95 @@ const MeetingTypeList = () => {
   }, []);
 
   const createMeeting = async () => {
-    if (!client || !user) return;
-    try {
+    if (!client || !user || !meetingState) return;
+
+    const isInstantMeeting = meetingState === 'isInstantMeeting';
+
+    if (!isInstantMeeting) {
       if (!values.dateTime) {
         toast({ title: 'Please select a date and time' });
         return;
       }
+
+      if (values.dateTime.getTime() <= Date.now()) {
+        toast({
+          title: 'Please choose a future time',
+          description: 'Scheduled meetings must start in the future.',
+        });
+        return;
+      }
+    }
+
+    setIsCreating(true);
+
+    try {
       const id = crypto.randomUUID();
       const call = client.call('default', id);
       if (!call) throw new Error('Failed to create meeting');
-      const startsAt =
-        values.dateTime.toISOString() || new Date(Date.now()).toISOString();
-      const description = values.description || 'Instant Meeting';
-      await call.getOrCreate({
-        data: {
-          starts_at: startsAt,
-          custom: {
-            description,
-          },
+
+      const description = values.description.trim() || (isInstantMeeting ? 'Instant Meeting' : 'Scheduled Meeting');
+      const callData: {
+        starts_at?: string;
+        custom: {
+          description: string;
+        };
+      } = {
+        custom: {
+          description,
         },
-      });
-      setCallDetail(call);
-      if (!values.description) {
-        router.push(`/meeting/${call.id}`);
+      };
+
+      if (!isInstantMeeting) {
+        callData.starts_at = values.dateTime.toISOString();
       }
+
+      await call.getOrCreate({
+        data: callData,
+      });
+
+      setCallDetail(call);
+
+      if (isInstantMeeting) {
+        setMeetingState(undefined);
+        router.push(`/meeting/${call.id}`);
+        return;
+      }
+
       toast({
         title: 'Meeting Created',
       });
     } catch (error) {
       console.error(error);
-      toast({ title: 'Failed to create Meeting' });
+
+      const errorMessage =
+        error instanceof Error && error.message
+          ? error.message
+          : 'Please verify your Stream API credentials and call permissions.';
+
+      toast({
+        title: 'Failed to create meeting',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsCreating(false);
     }
+  };
+
+  const openScheduleMeeting = () => {
+    setCallDetail(undefined);
+    setValues({ ...initialValues, dateTime: new Date() });
+    setMeetingState('isScheduleMeeting');
+  };
+
+  const openInstantMeeting = () => {
+    setValues({ ...initialValues, dateTime: new Date() });
+    setMeetingState('isInstantMeeting');
+  };
+
+  const openJoinMeeting = () => {
+    setValues((prev) => ({ ...prev, link: '' }));
+    setMeetingState('isJoiningMeeting');
   };
 
   const joinMeeting = () => {
@@ -125,19 +184,19 @@ const MeetingTypeList = () => {
         img="/icons/add-meeting.svg"
         title="New Meeting"
         description="Start an instant meeting"
-        handleClick={() => setMeetingState('isInstantMeeting')}
+        handleClick={openInstantMeeting}
       />
       <HomeCard
         img="/icons/join-meeting.svg"
         title="Join Meeting"
         description="via invitation link"
-        handleClick={() => setMeetingState('isJoiningMeeting')}
+        handleClick={openJoinMeeting}
       />
       <HomeCard
         img="/icons/schedule.svg"
         title="Schedule Meeting"
         description="Plan your meeting"
-        handleClick={() => setMeetingState('isScheduleMeeting')}
+        handleClick={openScheduleMeeting}
       />
       <HomeCard
         img="/icons/recordings.svg"
@@ -152,6 +211,8 @@ const MeetingTypeList = () => {
           onClose={() => setMeetingState(undefined)}
           title="Schedule Meeting"
           handleClick={createMeeting}
+          buttonText={isCreating ? 'Creating…' : 'Schedule Meeting'}
+          isLoading={isCreating}
         >
           <div className="flex flex-col gap-3">
             <label className="text-sm font-medium text-fg-secondary">
@@ -220,8 +281,9 @@ const MeetingTypeList = () => {
         onClose={() => setMeetingState(undefined)}
         title="Start Instant Meeting"
         className="text-center"
-        buttonText="Start Meeting"
+        buttonText={isCreating ? 'Creating…' : 'Start Meeting'}
         handleClick={createMeeting}
+        isLoading={isCreating}
       />
     </section>
   );

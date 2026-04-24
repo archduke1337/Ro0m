@@ -15,6 +15,8 @@ interface MeetingModalProps {
   buttonText?: string;
   image?: string;
   buttonIcon?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
 }
 
 const MeetingModal = ({
@@ -27,6 +29,8 @@ const MeetingModal = ({
   buttonText,
   image,
   buttonIcon,
+  isLoading,
+  isDisabled,
 }: MeetingModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,8 +48,10 @@ const MeetingModal = ({
           </h1>
           {children}
           <Button
+            type="button"
             className="w-full rounded-swift bg-fg-primary py-3 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity"
             onClick={handleClick}
+            disabled={isLoading || isDisabled}
           >
             {buttonIcon && (
               <Image
