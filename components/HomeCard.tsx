@@ -13,17 +13,9 @@ interface HomeCardProps {
 }
 
 const HomeCard = ({ className, img, title, description, handleClick }: HomeCardProps) => {
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleClick?.();
-    }
-  };
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       className={cn(
         'group relative overflow-hidden',
         'px-6 py-8 flex flex-col justify-between w-full xl:max-w-[270px] min-h-[240px]',
@@ -32,10 +24,10 @@ const HomeCard = ({ className, img, title, description, handleClick }: HomeCardP
         'hover:border-border hover:bg-bg-tertiary hover:shadow-swift',
         'focus:outline-none focus:ring-2 focus:ring-fg-primary/20 focus:ring-offset-2 focus:ring-offset-bg-primary',
         'active:scale-[0.98]',
+        'text-left',
         className
       )}
       onClick={handleClick}
-      onKeyDown={handleKeyDown}
       aria-label={`${title}: ${description}`}
     >
       {/* Subtle gradient overlay on hover */}
@@ -49,7 +41,7 @@ const HomeCard = ({ className, img, title, description, handleClick }: HomeCardP
         <h2 className="text-lg font-semibold text-fg-primary tracking-tight">{title}</h2>
         <p className="text-sm text-fg-secondary">{description}</p>
       </div>
-    </div>
+    </button>
   );
 };
 

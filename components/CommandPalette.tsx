@@ -256,6 +256,7 @@ const CommandPalette = () => {
           
           return (
             <button
+              type="button"
               key={item.id}
               onClick={item.action}
               onMouseEnter={() => setSelectedIndex(globalIndex)}
@@ -307,6 +308,9 @@ const CommandPalette = () => {
       <DialogContent className="max-w-[560px] p-0 border border-border-subtle bg-bg-elevated rounded-swift-xl overflow-hidden">
         {/* Search Input */}
         <div className="border-b border-border-subtle p-4">
+          <label htmlFor="command-palette-input" className="sr-only">
+            Search commands
+          </label>
           <div className="flex items-center gap-3">
             <svg 
               width="20" 
@@ -324,6 +328,7 @@ const CommandPalette = () => {
               />
             </svg>
             <input
+              id="command-palette-input"
               type="text"
               placeholder="Type a command or search..."
               value={search}

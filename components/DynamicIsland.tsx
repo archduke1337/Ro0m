@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LucideIcon, Bell, Mic, Video, Users, AlertCircle, Radio } from 'lucide-react';
+import { LucideIcon, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type IslandType = 'info' | 'success' | 'warning' | 'error' | 'recording';
@@ -19,23 +19,33 @@ interface IslandEvent extends CustomEvent {
 const DynamicIsland = () => {
   const [active, setActive] = useState(false);
   const [data, setData] = useState<{ label: string; icon?: LucideIcon; type?: IslandType } | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerIsland = useCallback((event: Event) => {
     const customEvent = event as IslandEvent;
     setData(customEvent.detail);
     setActive(true);
 
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+
     const duration = customEvent.detail.duration || 3000;
-    const timer = setTimeout(() => {
+    hideTimerRef.current = setTimeout(() => {
       setActive(false);
     }, duration);
-
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     window.addEventListener('dynamic-island', triggerIsland);
-    return () => window.removeEventListener('dynamic-island', triggerIsland);
+
+    return () => {
+      window.removeEventListener('dynamic-island', triggerIsland);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
   }, [triggerIsland]);
 
   const getIconColor = (type?: IslandType) => {

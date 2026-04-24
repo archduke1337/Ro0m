@@ -1,9 +1,8 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   CallControls,
   CallParticipantsList,
-  CallStatsButton,
   CallingState,
   PaginatedGridLayout,
   SpeakerLayout,
@@ -30,9 +29,15 @@ import DynamicIsland from './DynamicIsland';
 import { cn } from '@/lib/utils';
 import { useSounds } from '@/hooks/useSounds';
 import { usePaletteSync } from '@/hooks/usePaletteSync';
-import { useEffect } from 'react';
 
 type CallLayoutType = 'grid' | 'speaker-left' | 'speaker-right';
+type HandControlCall = {
+  raiseHand?: () => Promise<void>;
+  lowerHand?: () => Promise<void>;
+};
+type ParticipantWithHandState = {
+  isHandRaised?: boolean;
+};
 
 const MeetingRoom = () => {
   const searchParams = useSearchParams();
@@ -57,7 +62,9 @@ const MeetingRoom = () => {
   usePaletteSync(isPaletteSyncEnabled);
 
   const localParticipant = useLocalParticipant();
-  const isHandRaised = (localParticipant as any)?.isHandRaised;
+  const isHandRaised = Boolean(
+    (localParticipant as ParticipantWithHandState | undefined)?.isHandRaised,
+  );
   const { microphone, isMute } = useMicrophoneState();
   const { camera, isMute: isCameraMute } = useCameraState();
 
@@ -110,16 +117,18 @@ const MeetingRoom = () => {
   }, [call, localParticipant?.userId, playSound]);
 
   const toggleHand = useCallback(async () => {
-    if (!call) return;
+    const handCall = call as (typeof call & HandControlCall) | undefined;
+    if (!handCall?.raiseHand || !handCall?.lowerHand) return;
+
     try {
       if (isHandRaised) {
-        await (call as any).lowerHand();
+        await handCall.lowerHand();
         playSound('click');
         window.dispatchEvent(new CustomEvent('show-hud', { 
           detail: { label: 'Hand Lowered', icon: Hand, active: false } 
         }));
       } else {
-        await (call as any).raiseHand();
+        await handCall.raiseHand();
         playSound('hand');
         window.dispatchEvent(new CustomEvent('show-hud', { 
           detail: { label: 'Hand Raised', icon: Hand, active: true } 
@@ -258,6 +267,7 @@ const MeetingRoom = () => {
 
         {/* Raise Hand */}
         <button
+          type="button"
           onClick={toggleHand}
           className={cn(
             'cursor-pointer rounded-swift p-3 transition-all duration-200 border',
@@ -266,6 +276,8 @@ const MeetingRoom = () => {
               : 'bg-accent-muted border-border-subtle hover:bg-accent-hover text-fg-primary'
           )}
           title={isHandRaised ? 'Lower Hand' : 'Raise Hand'}
+          aria-label={isHandRaised ? 'Lower hand' : 'Raise hand'}
+          aria-pressed={isHandRaised}
         >
           <Hand 
             size={18} 
@@ -275,7 +287,11 @@ const MeetingRoom = () => {
 
         <DropdownMenu>
           <div className="flex items-center">
-            <DropdownMenuTrigger className="cursor-pointer rounded-swift bg-accent-muted border border-border-subtle p-3 hover:bg-accent-hover transition-colors">
+            <DropdownMenuTrigger
+              className="cursor-pointer rounded-swift bg-accent-muted border border-border-subtle p-3 hover:bg-accent-hover transition-colors"
+              aria-label="Change call layout"
+              title="Change call layout"
+            >
               <LayoutList size={18} className="text-fg-primary" />
             </DropdownMenuTrigger>
           </div>
@@ -298,6 +314,7 @@ const MeetingRoom = () => {
         
         {/* Toggle Stats Sidebar */}
         <button 
+          type="button"
           onClick={() => {
             setShowStats(!showStats);
             playSound('ping');
@@ -309,11 +326,14 @@ const MeetingRoom = () => {
               : 'bg-accent-muted border-border-subtle hover:bg-accent-hover text-fg-primary'
           )}
           title="System Stats (I)"
+          aria-label={showStats ? 'Hide system stats' : 'Show system stats'}
+          aria-pressed={showStats}
         >
           <Activity size={18} />
         </button>
         
         <button 
+          type="button"
           onClick={() => setShowParticipants((prev) => !prev)}
           className={cn(
             'cursor-pointer rounded-swift border p-3 transition-colors',
@@ -321,6 +341,8 @@ const MeetingRoom = () => {
               ? 'bg-fg-primary text-bg-primary border-fg-primary' 
               : 'bg-accent-muted border-border-subtle hover:bg-accent-hover text-fg-primary'
           )}
+          aria-label={showParticipants ? 'Hide participants' : 'Show participants'}
+          aria-pressed={showParticipants}
         >
           <Users size={18} />
         </button>

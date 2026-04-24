@@ -54,17 +54,18 @@ const PersonalRoom = () => {
 
   const meetingId = user?.id;
 
-  const { call } = useGetCallById(meetingId!);
+  const { call } = useGetCallById(meetingId);
 
   const startRoom = async () => {
-    if (!client || !user) return;
+    if (!client || !user || !meetingId) return;
 
-    const newCall = client.call("default", meetingId!);
+    const newCall = client.call("default", meetingId);
 
     if (!call) {
       await newCall.getOrCreate({
         data: {
           starts_at: new Date().toISOString(),
+          members: [{ user_id: user.id }],
         },
       });
     }
@@ -93,12 +94,14 @@ const PersonalRoom = () => {
       <div className="flex gap-3">
         <Button 
           className="rounded-swift bg-fg-primary px-6 py-2.5 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity" 
+          disabled={!meetingId}
           onClick={startRoom}
         >
           Start Meeting
         </Button>
         <Button
           className="rounded-swift bg-accent-muted border border-border-subtle px-6 py-2.5 text-sm font-medium text-fg-primary hover:bg-accent-hover transition-colors flex items-center gap-2"
+          disabled={!meetingId}
           onClick={() => {
             const inviteText = `Join my meeting room!\n\nTopic: ${user?.username}'s Meeting Room\nMeeting ID: ${meetingId}\nJoin Link: ${meetingLink}`;
             copyToClipboard(inviteText);

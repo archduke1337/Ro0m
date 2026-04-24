@@ -2,12 +2,19 @@
 
 import { useCallStateHooks } from '@stream-io/video-react-sdk';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Zap, Shield, BarChart3, X } from 'lucide-react';
+import { Activity, Zap, BarChart3, X, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MeetingStatsHUDProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface StatItemProps {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  unit?: string;
 }
 
 const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
@@ -23,7 +30,7 @@ const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
   const bitrate = (statsReport?.publisherStats?.totalBytesSent || 0) / 1024; // Simple kb estimate
   const jitter = statsReport?.publisherStats?.averageJitterInMs || 0;
 
-  const StatItem = ({ label, value, icon: Icon, unit = '' }: any) => (
+  const StatItem = ({ label, value, icon: Icon, unit = '' }: StatItemProps) => (
     <div className="flex items-center justify-between py-2 border-b border-white/[0.05] last:border-0">
       <div className="flex items-center gap-3">
         <div className="p-1.5 rounded-swift bg-white/[0.05]">
@@ -54,8 +61,10 @@ const MeetingStatsHUD = ({ isOpen, onClose }: MeetingStatsHUDProps) => {
               <span className="text-xs font-bold uppercase tracking-widest text-fg-primary">System Status</span>
             </div>
             <button 
+              type="button"
               onClick={onClose}
               className="p-1 rounded-swift hover:bg-white/[0.1] text-fg-tertiary transition-colors"
+              aria-label="Close system status panel"
             >
               <X size={14} />
             </button>

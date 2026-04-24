@@ -16,7 +16,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Ro0m",
-  description: "Video calling App",
+  description: "Clerk-authenticated video meetings built with Next.js and Stream Video.",
   icons: {
     icon: "/icons/logo.svg",
   },

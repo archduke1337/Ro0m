@@ -33,6 +33,8 @@ const MeetingSetup = ({
 
   // https://getstream.io/video/docs/react/ui-cookbook/replacing-call-controls/
   const [isMicCamToggled, setIsMicCamToggled] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isMicCamToggled) {
@@ -95,13 +97,30 @@ const MeetingSetup = ({
       
       <Button
         className="rounded-swift bg-fg-primary px-8 py-3 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity"
-        onClick={() => {
-          call.join();
-          setIsSetupComplete(true);
+        disabled={isJoining}
+        onClick={async () => {
+          if (isJoining) return;
+
+          setIsJoining(true);
+          setJoinError(null);
+
+          try {
+            await call.join();
+            setIsSetupComplete(true);
+          } catch (error) {
+            console.error('Failed to join meeting:', error);
+            setJoinError('Unable to join meeting. Please try again.');
+          } finally {
+            setIsJoining(false);
+          }
         }}
       >
-        Join Meeting
+        {isJoining ? 'Joining...' : 'Join Meeting'}
       </Button>
+
+      {joinError && (
+        <p className="text-sm text-system-error">{joinError}</p>
+      )}
     </div>
   );
 };

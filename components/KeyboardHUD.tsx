@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 
@@ -15,23 +15,33 @@ interface HUDEvent extends CustomEvent {
 const KeyboardHUD = () => {
   const [visible, setVisible] = useState(false);
   const [data, setData] = useState<{ label: string; icon: LucideIcon; active?: boolean } | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showHUD = useCallback((event: Event) => {
     const customEvent = event as HUDEvent;
     setData(customEvent.detail);
     setVisible(true);
 
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+    }
+
     // Auto-hide after 1.5 seconds
-    const timer = setTimeout(() => {
+    hideTimerRef.current = setTimeout(() => {
       setVisible(false);
     }, 1500);
-
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     window.addEventListener('show-hud', showHUD);
-    return () => window.removeEventListener('show-hud', showHUD);
+
+    return () => {
+      window.removeEventListener('show-hud', showHUD);
+
+      if (hideTimerRef.current) {
+        clearTimeout(hideTimerRef.current);
+      }
+    };
   }, [showHUD]);
 
   return (

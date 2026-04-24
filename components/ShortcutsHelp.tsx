@@ -68,8 +68,10 @@ const ShortcutsHelp = () => {
         <div className="flex items-center justify-between border-b border-border-subtle px-6 py-4">
           <h2 className="text-lg font-semibold text-fg-primary">Keyboard Shortcuts</h2>
           <button 
+            type="button"
             onClick={() => setOpen(false)}
             className="p-1 rounded-swift hover:bg-accent-muted transition-colors"
+            aria-label="Close keyboard shortcuts"
           >
             <X size={18} className="text-fg-tertiary" />
           </button>

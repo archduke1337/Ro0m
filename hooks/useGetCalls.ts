@@ -1,12 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Call, useStreamVideoClient } from '@stream-io/video-react-sdk';
+
+const getTimestamp = (value?: string | Date) => {
+  if (!value) return 0;
+  return new Date(value).getTime();
+};
 
 export const useGetCalls = () => {
   const { user } = useUser();
   const client = useStreamVideoClient();
-  const [calls, setCalls] = useState<Call[]>();
+  const [calls, setCalls] = useState<Call[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNow(new Date());
+    }, 30_000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const loadCalls = async () => {
@@ -27,7 +41,7 @@ export const useGetCalls = () => {
           },
         });
 
-        setCalls(calls);
+        setCalls(calls ?? []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -38,15 +52,23 @@ export const useGetCalls = () => {
     loadCalls();
   }, [client, user?.id]);
 
-  const now = new Date();
+  const endedCalls = useMemo(() => {
+    return calls
+      .filter(({ state: { endedAt } }: Call) => Boolean(endedAt))
+      .sort((a, b) => {
+        const aTimestamp = getTimestamp(a.state.endedAt ?? a.state.startsAt);
+        const bTimestamp = getTimestamp(b.state.endedAt ?? b.state.startsAt);
+        return bTimestamp - aTimestamp;
+      });
+  }, [calls]);
 
-  const endedCalls = calls?.filter(({ state: { startsAt, endedAt } }: Call) => {
-    return (startsAt && new Date(startsAt) < now) || !!endedAt
-  })
+  const upcomingCalls = useMemo(() => {
+    return calls
+      .filter(({ state: { startsAt, endedAt } }: Call) => {
+        return Boolean(startsAt) && !endedAt && getTimestamp(startsAt) > now.getTime();
+      })
+      .sort((a, b) => getTimestamp(a.state.startsAt) - getTimestamp(b.state.startsAt));
+  }, [calls, now]);
 
-  const upcomingCalls = calls?.filter(({ state: { startsAt } }: Call) => {
-    return startsAt && new Date(startsAt) > now
-  })
-
-  return { endedCalls, upcomingCalls, callRecordings: calls, isLoading }
+  return { endedCalls, upcomingCalls, callRecordings: calls, isLoading };
 };
