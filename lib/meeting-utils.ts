@@ -10,3 +10,6 @@ export const getMeetingLink = (id: string) => {
 
   return `${window.location.origin}/meeting/${id}`;
 };
+
+export const getCallType = () =>
+  process.env.NEXT_PUBLIC_STREAM_CALL_TYPE?.trim() || 'development';

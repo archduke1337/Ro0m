@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   DeviceSettings,
   VideoPreview,
@@ -9,6 +9,32 @@ import {
 
 import Alert from './Alert';
 import { Button } from './ui/button';
+
+const getReadableDeviceError = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return 'Unable to access camera and microphone. Please try again.';
+  }
+
+  if (
+    error.message.includes('Permission denied') ||
+    error.message.includes('NotAllowedError')
+  ) {
+    return 'Camera or microphone permission is blocked. Allow access in your browser settings.';
+  }
+
+  if (error.message.includes('NotFoundError')) {
+    return 'No usable camera or microphone was found on this device.';
+  }
+
+  if (
+    error.message.includes('send-audio') ||
+    error.message.includes('send-video')
+  ) {
+    return 'Your user role is missing media publishing permissions (send-audio/send-video).';
+  }
+
+  return error.message;
+};
 
 const isCallNotFoundError = (error: unknown) => {
   if (!(error instanceof Error)) return false;
@@ -43,16 +69,60 @@ const MeetingSetup = ({
   const [isMicCamToggled, setIsMicCamToggled] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [deviceError, setDeviceError] = useState<string | null>(null);
+
+  const applyDevicePreference = useCallback(
+    async (disableDevices: boolean) => {
+      if (disableDevices) {
+        await call.camera.disable();
+        await call.microphone.disable();
+        return;
+      }
+
+      await call.camera.enable();
+      await call.microphone.enable();
+    },
+    [call],
+  );
+
+  const requestDevicePermission = async () => {
+    if (
+      typeof navigator === 'undefined' ||
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
+      return;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+
+    stream.getTracks().forEach((track) => track.stop());
+  };
 
   useEffect(() => {
-    if (isMicCamToggled) {
-      call.camera.disable();
-      call.microphone.disable();
-    } else {
-      call.camera.enable();
-      call.microphone.enable();
-    }
-  }, [isMicCamToggled, call.camera, call.microphone]);
+    let isCancelled = false;
+
+    const syncDevicePreference = async () => {
+      try {
+        setDeviceError(null);
+        await applyDevicePreference(isMicCamToggled);
+      } catch (error) {
+        if (isCancelled) return;
+
+        console.error('Failed to set device preference:', error);
+        setDeviceError(getReadableDeviceError(error));
+      }
+    };
+
+    syncDevicePreference();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isMicCamToggled, applyDevicePreference]);
 
   if (callTimeNotArrived)
     return (
@@ -102,6 +172,10 @@ const MeetingSetup = ({
         </label>
         <DeviceSettings />
       </div>
+
+      {deviceError && (
+        <p className="max-w-md text-center text-sm text-system-error">{deviceError}</p>
+      )}
       
       <Button
         className="rounded-swift bg-fg-primary px-8 py-3 text-sm font-medium text-bg-primary hover:opacity-90 transition-opacity"
@@ -113,7 +187,24 @@ const MeetingSetup = ({
           setJoinError(null);
 
           try {
+            if (!isMicCamToggled) {
+              await requestDevicePermission();
+            }
+
             await call.join();
+
+            try {
+              await applyDevicePreference(isMicCamToggled);
+            } catch (error) {
+              console.error('Failed to publish local media after join:', error);
+
+              await call.leave().catch((leaveError) => {
+                console.error('Failed to leave call after media publish error:', leaveError);
+              });
+
+              throw new Error(getReadableDeviceError(error));
+            }
+
             setIsSetupComplete(true);
           } catch (error) {
             console.error('Failed to join meeting:', error);
@@ -127,6 +218,9 @@ const MeetingSetup = ({
                 });
 
                 await call.join();
+
+                await applyDevicePreference(isMicCamToggled);
+
                 setIsSetupComplete(true);
                 return;
               } catch (createError) {
@@ -139,7 +233,12 @@ const MeetingSetup = ({
               return;
             }
 
-            setJoinError('Unable to join meeting. Please try again.');
+            const message =
+              error instanceof Error && error.message
+                ? error.message
+                : 'Unable to join meeting. Please try again.';
+
+            setJoinError(message);
           } finally {
             setIsJoining(false);
           }

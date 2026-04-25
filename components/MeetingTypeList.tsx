@@ -12,7 +12,7 @@ import { Textarea } from './ui/textarea';
 import ReactDatePicker from 'react-datepicker';
 import { useToast } from './ui/use-toast';
 import { Input } from './ui/input';
-import { getMeetingLink } from '@/lib/meeting-utils';
+import { getCallType, getMeetingLink } from '@/lib/meeting-utils';
 import { HomeCardSkeleton } from './Skeleton';
 
 const initialValues = {
@@ -74,7 +74,7 @@ const MeetingTypeList = () => {
 
     try {
       const id = crypto.randomUUID();
-      const call = client.call('default', id);
+      const call = client.call(getCallType(), id);
       if (!call) throw new Error('Failed to create meeting');
 
       const description = values.description.trim() || (isInstantMeeting ? 'Instant Meeting' : 'Scheduled Meeting');
