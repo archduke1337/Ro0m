@@ -26,6 +26,10 @@ const getReadableDeviceError = (error: unknown) => {
     return 'No usable camera or microphone was found on this device.';
   }
 
+  if (error.message.includes('NotReadableError')) {
+    return 'Camera or microphone is already in use by another app or browser tab.';
+  }
+
   if (
     error.message.includes('send-audio') ||
     error.message.includes('send-video')

@@ -8,7 +8,7 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { getMeetingLink } from "@/lib/meeting-utils";
+import { getCallType, getMeetingLink } from "@/lib/meeting-utils";
 
 const InfoRow = ({
   label,
@@ -61,7 +61,7 @@ const PersonalRoom = () => {
     setIsStartingRoom(true);
 
     try {
-      const personalRoomCall = client.call("default", meetingId);
+      const personalRoomCall = client.call(getCallType(), meetingId);
 
       await personalRoomCall.getOrCreate({
         data: {
