@@ -40,6 +40,33 @@ const getReadableDeviceError = (error: unknown) => {
   return error.message;
 };
 
+const REQUIRED_MEDIA_CAPABILITIES = ['send-audio', 'send-video'];
+
+const getCapabilityDiagnostic = (capabilities?: readonly string[]) => {
+  if (!capabilities?.length) return null;
+
+  const missingCapabilities = REQUIRED_MEDIA_CAPABILITIES.filter(
+    (capability) => !capabilities.includes(capability),
+  );
+
+  if (!missingCapabilities.length) return null;
+
+  return `Missing call capabilities: ${missingCapabilities.join(', ')}. Current capabilities: ${capabilities.join(', ')}.`;
+};
+
+const appendCapabilityDiagnostic = (
+  message: string,
+  capabilities?: readonly string[],
+) => {
+  const capabilityDiagnostic = getCapabilityDiagnostic(capabilities);
+
+  if (!capabilityDiagnostic || message.includes('Missing call capabilities:')) {
+    return message;
+  }
+
+  return `${message} ${capabilityDiagnostic}`;
+};
+
 const isCallNotFoundError = (error: unknown) => {
   if (!(error instanceof Error)) return false;
 
@@ -54,9 +81,11 @@ const MeetingSetup = ({
   allowCreateOnJoin?: boolean;
 }) => {
   // https://getstream.io/video/docs/react/guides/call-and-participant-state/#call-state
-  const { useCallEndedAt, useCallStartsAt } = useCallStateHooks();
+  const { useCallEndedAt, useCallStartsAt, useOwnCapabilities } = useCallStateHooks();
   const callStartsAt = useCallStartsAt();
   const callEndedAt = useCallEndedAt();
+  const ownCapabilities = useOwnCapabilities();
+  const ownCapabilityNames = ownCapabilities?.map(String);
   const callTimeNotArrived =
     callStartsAt && new Date(callStartsAt) > new Date();
   const callHasEnded = !!callEndedAt;
@@ -196,6 +225,7 @@ const MeetingSetup = ({
             }
 
             await call.join();
+            const joinedCapabilityNames = call.state.ownCapabilities?.map(String);
 
             try {
               await applyDevicePreference(isMicCamToggled);
@@ -206,7 +236,12 @@ const MeetingSetup = ({
                 console.error('Failed to leave call after media publish error:', leaveError);
               });
 
-              throw new Error(getReadableDeviceError(error));
+              throw new Error(
+                appendCapabilityDiagnostic(
+                  getReadableDeviceError(error),
+                  joinedCapabilityNames,
+                ),
+              );
             }
 
             setIsSetupComplete(true);
@@ -229,6 +264,20 @@ const MeetingSetup = ({
                 return;
               } catch (createError) {
                 console.error('Failed to auto-create personal room:', createError);
+
+                const capabilityNamesForCreateError = call.state.ownCapabilities?.map(String) || ownCapabilityNames;
+                const createMessage =
+                  createError instanceof Error && createError.message
+                    ? getReadableDeviceError(createError)
+                    : 'Unable to create and join personal room. Please try again.';
+
+                setJoinError(
+                  appendCapabilityDiagnostic(
+                    createMessage,
+                    capabilityNamesForCreateError,
+                  ),
+                );
+                return;
               }
             }
 
@@ -237,12 +286,20 @@ const MeetingSetup = ({
               return;
             }
 
+            const latestCapabilityNames = call.state.ownCapabilities?.map(String);
+            const capabilityNamesForError =
+              latestCapabilityNames && latestCapabilityNames.length > 0
+                ? latestCapabilityNames
+                : ownCapabilityNames;
+
             const message =
               error instanceof Error && error.message
-                ? error.message
+                ? getReadableDeviceError(error)
                 : 'Unable to join meeting. Please try again.';
 
-            setJoinError(message);
+            setJoinError(
+              appendCapabilityDiagnostic(message, capabilityNamesForError),
+            );
           } finally {
             setIsJoining(false);
           }

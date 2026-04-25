@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Call, useStreamVideoClient } from '@stream-io/video-react-sdk';
+import { getCallType } from '@/lib/meeting-utils';
 
 export const useGetCallById = (id?: string | string[] | null) => {
   const [call, setCall] = useState<Call>();
@@ -7,6 +8,7 @@ export const useGetCallById = (id?: string | string[] | null) => {
 
   const client = useStreamVideoClient();
   const callId = Array.isArray(id) ? id[0] : id;
+  const preferredCallType = getCallType();
 
   useEffect(() => {
     if (!client || !callId) {
@@ -26,8 +28,12 @@ export const useGetCallById = (id?: string | string[] | null) => {
 
         if (isCancelled) return;
 
-        if (calls.length > 0) setCall(calls[0]);
-        else setCall(undefined);
+        if (calls.length > 0) {
+          const matchingCall = calls.find((candidate) => candidate.type === preferredCallType);
+          setCall(matchingCall || calls[0]);
+        } else {
+          setCall(undefined);
+        }
 
         setIsCallLoading(false);
       } catch (error) {
@@ -44,7 +50,7 @@ export const useGetCallById = (id?: string | string[] | null) => {
     return () => {
       isCancelled = true;
     };
-  }, [client, callId]);
+  }, [client, callId, preferredCallType]);
 
   return { call, isCallLoading };
 };
